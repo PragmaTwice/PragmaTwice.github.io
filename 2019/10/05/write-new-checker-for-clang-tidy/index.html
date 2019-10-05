@@ -15,7 +15,7 @@
 <meta property="og:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.com/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png">
-<meta property="og:updated_time" content="2019-10-05T16:28:09.276Z">
+<meta property="og:updated_time" content="2019-10-05T16:33:06.669Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何给 clang-tidy 写新 checker">
 <meta name="twitter:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
@@ -172,8 +172,19 @@
 <p>写起来有种 SQL 的查询语句一样的感觉（或是其他 query language），有种函数式的手感。但众所周知，这个库用的一些算不上奇技淫巧的“技巧”来完成，所以如果不慎用错函数，编译错误信息简直难以看懂，哦不，根本看不懂。不过没到元编程的那种境界，如果你比较熟悉 C++，找到错误还是不难的（盲猜）。</p>
 <p>对于比较简单的，不含递归的检查，我们可以使用 matcher 很轻易的完成，这是 matcher 最大的优点。reference 上有个不错的例子（我做了修改）： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">recordDecl(hasDescendant(</span><br><span class="line">    ifStmt(hasThen(</span><br><span class="line">        stmt(hasDescendant(</span><br><span class="line">            ifStmt()))))))</span><br></pre></td></tr></table></figure></p>
 <p>我们可以调出 query language 那种特定的脑回路来读这段代码：有一个 <code>recordDecl</code>（记录声明，在 c++ 里可以看作 <code>struct</code>/<code>class</code>），它有这样的后代（即 AST 上这个 <code>recordDecl</code> 节点的后代节点），which is 一个 <code>ifStmt</code>，这个 <code>ifStmt</code> 的 true 分支语句中有后代为 <code>ifStmt</code>，整体来说非常易懂且简洁。</p>
-<p>我们会发现库中提供了三类匹配器： - Node Matchers: 匹配某个类型的节点，如上面的 <code>recordDecl</code>、<code>ifStmt</code> - Narrowing Matchers: 匹配节点的某种属性，上面的语句中没有出现，但这一类应该最容易理解，如描述某个 <code>CXXMethodDecl</code> 是否被 const 修饰的 <code>isConst</code> - Traversal Matchers: 遍历匹配器，用来描述节点间关系，如上面的 <code>hasDescendant</code>、<code>hasThen</code></p>
-<p>那么我们怎么表达逻辑稍微复杂点的匹配查询呢，我们需要一些可以组合的、通用的谓词： - all: 描述某些谓词全部成立 - any: 描述某些谓词至少有一个成立 - anything: 这个谓词始终成立 - unless: 描述某个谓词不成立，类似于取非</p>
+<p>我们会发现库中提供了三类匹配器：</p>
+<ul>
+<li>Node Matchers: 匹配某个类型的节点，如上面的 <code>recordDecl</code>、<code>ifStmt</code></li>
+<li>Narrowing Matchers: 匹配节点的某种属性，上面的语句中没有出现，但这一类应该最容易理解，如描述某个 <code>CXXMethodDecl</code> 是否被 const 修饰的 <code>isConst</code></li>
+<li>Traversal Matchers: 遍历匹配器，用来描述节点间关系，如上面的 <code>hasDescendant</code>、<code>hasThen</code></li>
+</ul>
+<p>那么我们怎么表达逻辑稍微复杂点的匹配查询呢，我们需要一些可以组合的、通用的谓词：</p>
+<ul>
+<li>all: 描述某些谓词全部成立</li>
+<li>any: 描述某些谓词至少有一个成立</li>
+<li>anything: 这个谓词始终成立</li>
+<li>unless: 描述某个谓词不成立，类似于取非</li>
+</ul>
 <p>还有一些比较通用的谓词，如 forEach, has 等，顾名思义，请查看文档。</p>
 <p>掌握了这些知识，我们就可以根据文档做一些练习，如：</p>
 <ul>
