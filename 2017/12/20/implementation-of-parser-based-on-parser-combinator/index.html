@@ -6,21 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。">
+    <meta name="description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上">
 <meta name="keywords" content="c++,parser,parser combinator,implementation,chtholly">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于解析器组合子的文法解析器的实现">
 <meta property="og:url" content="https://imtwice.com/2017/12/20/implementation-of-parser-based-on-parser-combinator/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
-<meta property="og:description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。">
+<meta property="og:description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/design-show.png">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/impl-show.png">
-<meta property="og:updated_time" content="2019-10-05T14:18:28.759Z">
+<meta property="og:updated_time" content="2019-10-05T14:31:35.300Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于解析器组合子的文法解析器的实现">
-<meta name="twitter:description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。">
+<meta name="twitter:description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上">
 <meta name="twitter:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg">
     
     
@@ -158,7 +158,8 @@
   <div class="content" itemprop="articleBody">
     <p><img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt="chtholly-in-comic"> ## <em>背景</em></p>
 <p>　　<em>毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。</em></p>
-<p>　　<em>1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。</em> 　　 　　<em>上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上，几乎所有程序设计语言都是通过上下文无关文法来定义的。另一方面，上下文无关文法又足够简单，使得我们可以构造有效的分析算法来检验一个给定字串是否是由某个上下文无关文法产生的。</em></p>
+<p>　　<em>1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。</em></p>
+<p>　　<em>上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上，几乎所有程序设计语言都是通过上下文无关文法来定义的。另一方面，上下文无关文法又足够简单，使得我们可以构造有效的分析算法来检验一个给定字串是否是由某个上下文无关文法产生的。</em></p>
 <h2 id="理论基础">理论基础</h2>
 <h3 id="ll分析器">LL分析器</h3>
 <p>　　LL分析器是一种处理某些上下文无关文法的自顶向下分析器。它通常被称为是“递归下降”的，这与自底向上的LR分析器的特点“规约上升”相反。它从左到右处理输入，再对句型执行最左推导出语法树。 　　 ### 组合子逻辑 　　组合子逻辑是等价于lambda演算的计算模型，可以被看作是lambda演算的变体，它把lambda表达式（用来允许函数抽象）替代为组合子的有限集合，它们是不包含自由变量的原始函数。 　　 ### 解析器组合子 　　解析器组合子是一个高阶函数，接受几个解析器作为输入，并返回一个新的解析器作为输出。在这种情况下，解析器是一个接受字符串作为输入并返回一些结构作为输出的函数，通常是一个解析树或一组表示解析成功停止的字符串中的位置。 　　解析器组合子实现了递归下降解析策略，有助于模块化分段构建和测试。这种解析技术被称为组合式解析。使用组合子构建的解析器可以直接构建，可读，模块化，结构良好，易于维护。它们已被广泛用于编译器和处理器的原型。</p>
