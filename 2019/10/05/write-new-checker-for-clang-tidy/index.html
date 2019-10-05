@@ -6,15 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="keywords" content="clang,llvm,clang-tidy,checker">
+    <meta name="description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
+<meta name="keywords" content="clang,llvm,clang-tidy,checker">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何给 clang-tidy 写新 checker">
 <meta property="og:url" content="https://imtwice.com/2019/10/05/write-new-checker-for-clang-tidy/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-10-05T14:31:35.300Z">
+<meta property="og:updated_time" content="2019-10-05T15:26:56.603Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何给 clang-tidy 写新 checker">
+<meta name="twitter:description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
     
     
         
@@ -98,7 +101,7 @@
 
     </div>
     <div id="toc">
-      
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#clang-tidy-里的-checker-起着着怎样的作用"><span class="toc-number">1.</span> <span class="toc-text">clang-tidy 里的 checker 起着着怎样的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#开始行动"><span class="toc-number">2.</span> <span class="toc-text">开始行动</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -147,7 +150,19 @@
   
 
   <div class="content" itemprop="articleBody">
-    
+    <h1 id="clang-tidy-里的-checker-起着着怎样的作用">clang-tidy 里的 checker 起着着怎样的作用</h1>
+<p>clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。</p>
+<p>把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 <code>.cpp</code> 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。</p>
+<p>每个 checker 都是针对某一特定问题的的检测器，如 <a href="https://github.com/isocpp/CppCoreGuidelines" target="_blank" rel="noopener">CppCoreGuidelines</a> 是标准委员会提出的一些“最佳实践”，我们也可以称之为“规范”或者“约束”。而 clang-tidy 实现了对于每一个“规范”项的检查，如 <code>CppCoreGuidelines/AvoidGotoCheck</code> 实现了对于 <a href="http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto" target="_blank" rel="noopener">ES.76: Avoid goto</a> 的检查。</p>
+<p>我们可以做个小试验： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    loop: <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"hello"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">goto</span> loop;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后执行 clang-tidy 以检测文件（设以上代码保存到 test.cpp） <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> clang-tidy --checks="cppcoreguidelines-avoid-goto" test.cpp --</span><br></pre></td></tr></table></figure></p>
+<p>很多人会好奇为什么语句的末尾有 <code>--</code>，所以我决定不做解释。我们发现有类似以下的输出： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1 warning generated.</span><br><span class="line">test.cpp:5:2: warning: avoid using &apos;goto&apos; for flow control [cppcoreguidelines-avoid-goto]</span><br><span class="line">        goto loop;</span><br><span class="line">        ^</span><br><span class="line">test.cpp:4:2: note: label defined here</span><br><span class="line">        loop: f();</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure></p>
+<p>clang-tidy 检测出了 goto 语句处与标签的定义处。</p>
+<p>不过我相信很多人会抱怨这个检查太 trivial，下面我们会写较复杂的 checker 以体验 clang-tidy 借助于强大的 LLVM/clang 而具有的无穷威力。</p>
+<h1 id="开始行动">开始行动</h1>
+<p>首先，本篇文章并不包含环境的搭建、代码的详细解读、API 的说明，也并不给出源代码。其次，我假设读者熟悉 C++ （<code>std&gt;=11</code>）；编译器前端的知识，包括 parser 等；以及软件工程知识，如 visitor pattern。</p>
+<p>clang-tidy 提供了一个名为 <code>add_new_check</code> 的脚本文件（用 Python 编写），用以快速生成新的 checker，我们可以借助他来 init。之后我真诚地推荐读者先 cmake 出平台特定的可构建项目后构建整个项目，在这个过程中你可以选择看个电影、陪妹子吃顿饭、唱K，总之请不要把时光葬送在盯着进度条看上。</p>
+<p><em>未完待续</em></p>
 
   </div>
 </article>
@@ -173,7 +188,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#clang-tidy-里的-checker-起着着怎样的作用"><span class="toc-number">1.</span> <span class="toc-text">clang-tidy 里的 checker 起着着怎样的作用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#开始行动"><span class="toc-number">2.</span> <span class="toc-text">开始行动</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
