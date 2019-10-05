@@ -15,7 +15,7 @@
 <meta property="og:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.com/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png">
-<meta property="og:updated_time" content="2019-10-05T16:33:06.669Z">
+<meta property="og:updated_time" content="2019-10-05T16:46:18.189Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何给 clang-tidy 写新 checker">
 <meta name="twitter:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
@@ -192,7 +192,17 @@
 <li>（选做）并在诊断信息中输出 sizeof 中的表达式及其类型</li>
 </ul>
 <h2 id="visitor真香">visitor：真香</h2>
-<p><em>未完待续</em></p>
+<p>当遇到非常复杂的逻辑时，一个 matcher 可能很难或是无法完成任务，多个 matcher 或许很复杂或是也无法完成任务，我们可以配合使用 visitor 来完成。</p>
+<p>我们只介绍 <code>StmtVisitor</code>，顾名思义它可以遍历 AST 中的 <code>Stmt</code> 节点，我们需要知道的是在 Clang 里 <code>Expr</code> 继承了 <code>Stmt</code>，所以我们可以用它访问语句和表达式。</p>
+<p>构建一个可以 work 的 vistor 很简单，我们只需要继承 <code>StmtVistor</code>，然后重写 <code>VisitStmt</code> 以遍历每个 <code>Stmt</code> 节点的所有子节点，如： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VisitStmt</span><span class="params">(Stmt *stmt)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> *child : stmt-&gt;children()) &#123;</span><br><span class="line">    Visit(child);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样我们就可以访问到全部的节点，然后我们可以根据需要重写其他的方法，以完成特定的任务，如重写 <code>VisitCXXMemberCallExpr</code> 以在访问到 <code>CXXMemberCallExpr</code> 时做一些事情。</p>
+<p>好了，让我们开始练习：</p>
+<ul>
+<li>实现针对《Effective C++》中第九条“在析构/构造时不要调用虚函数” 的检测器</li>
+<li>（选做）输出时请指明在 ctor/dtor 中哪一个调用涉及了虚函数，如果这个调用本身不是虚函数，那么请指出这个调用中在那个地方调用了虚函数</li>
+</ul>
+<p>思路提示：当然是 DFS 啦</p>
+<p>（答案可来信索取，自己完成或许更有成就感）</p>
 <ol type="1">
 <li><a href="https://clang.llvm.org/extra/clang-tidy/" target="_blank" rel="noopener">Clang-Tidy - Clang documentation</a></li>
 <li><a href="https://clang.llvm.org/docs/LibASTMatchers.html" target="_blank" rel="noopener">Matching the Clang AST - Clang documentation</a></li>
