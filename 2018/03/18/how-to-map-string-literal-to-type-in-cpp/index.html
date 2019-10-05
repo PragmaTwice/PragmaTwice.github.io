@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang=en>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 我觉得我可以写一个趣味小故事了 在2013年，Richard Smith提了个提案，n3599。 如果这个提案进了标准，那么将完美地解决题主的问题。 可惜没有。 为什么呢，标准委员会以 Revise with additional machinery for compile time string processing 为由拒绝了这个提案。">
+<meta name="keywords" content="c++,zhihu,string literal,type,template,meta programming">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 如何把字符串字面量的内容映射到类型">
+<meta property="og:url" content="https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 我觉得我可以写一个趣味小故事了 在2013年，Richard Smith提了个提案，n3599。 如果这个提案进了标准，那么将完美地解决题主的问题。 可惜没有。 为什么呢，标准委员会以 Revise with additional machinery for compile time string processing 为由拒绝了这个提案。">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+<meta property="og:updated_time" content="2019-10-05T14:06:02.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="C++ 如何把字符串字面量的内容映射到类型">
+<meta name="twitter:description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 我觉得我可以写一个趣味小故事了 在2013年，Richard Smith提了个提案，n3599。 如果这个提案进了标准，那么将完美地解决题主的问题。 可惜没有。 为什么呢，标准委员会以 Revise with additional machinery for compile time string processing 为由拒绝了这个提案。">
+<meta name="twitter:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>C++ 如何把字符串字面量的内容映射到类型</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- persian styles -->
+    
+      <link rel="stylesheet" href="/css/rtl.css">
+    
+    <!-- rss --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+    
+    
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2018/10/01/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2018/03/11/top-level-const-and-low-level-const-in-cpp/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&text=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&is_video=false&description=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 如何把字符串字面量的内容映射到类型&body=Check out this article: https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&name=C++ 如何把字符串字面量的内容映射到类型&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#注意"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#我觉得我可以写一个趣味小故事了"><span class="toc-number">2.</span> <span class="toc-text">我觉得我可以写一个趣味小故事了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么这么好的feature不能想办法加入标准呢"><span class="toc-number">3.</span> <span class="toc-text">为什么这么好的feature不能想办法加入标准呢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#section"><span class="toc-number">4.</span> <span class="toc-text">18.3.5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#section-1"><span class="toc-number">5.</span> <span class="toc-text">18.3.18</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        C++ 如何把字符串字面量的内容映射到类型
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">I'm Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-03-18T12:00:00.000Z" itemprop="datePublished">2018-03-18</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/daily/">daily</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/c/">c++</a>, <a class="tag-link" href="/tags/meta-programming/">meta programming</a>, <a class="tag-link" href="/tags/string-literal/">string literal</a>, <a class="tag-link" href="/tags/template/">template</a>, <a class="tag-link" href="/tags/type/">type</a>, <a class="tag-link" href="/tags/zhihu/">zhihu</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="注意">注意</h2>
+<p><img src="/images/zhihu/zhihu.jpg" alt="zhihu"> 本文旨在整理知乎上的回答，原答案链接请<a href="https://www.zhihu.com/question/268188946/answer/334037634" target="_blank" rel="noopener">戳这里</a>。</p>
+<h2 id="我觉得我可以写一个趣味小故事了">我觉得我可以写一个趣味小故事了</h2>
+<p>在2013年，Richard Smith提了个提案，<a href="http://open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html" target="_blank" rel="noopener">n3599</a>。</p>
+<p>如果这个提案进了标准，那么将完美地解决题主的问题。</p>
+<p>可惜没有。</p>
+<p>为什么呢，标准委员会以 <em>Revise with additional machinery for compile time string processing</em> 为由拒绝了这个提案。</p>
+<p>但是很 happy 的是，gcc 和 clang 都支持了这项提案，当然 clang 要加一条编译选项 <code>-Wgnu-string-literal-operator-template</code></p>
+<p>所以我先随意写一下 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> CharT, CharT... s&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> <span class="keyword">operator</span> <span class="string">""</span>_fuck() -&gt; <span class="built_in">std</span>::integer_sequence&lt;CharT, s...&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> STRLIT_TO_TYPE(strlit) strlit##_fuck</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static_assert</span>(</span><br><span class="line">        <span class="built_in">std</span>::is_same_v&lt;</span><br><span class="line">            <span class="keyword">decltype</span>(STRLIT_TO_TYPE(<span class="string">"abc"</span>)),</span><br><span class="line">            <span class="built_in">std</span>::integer_sequence&lt;<span class="keyword">char</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>&gt;</span><br><span class="line">        &gt;,</span><br><span class="line">        <span class="string">"Fuck"</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="为什么这么好的feature不能想办法加入标准呢">为什么这么好的feature不能想办法加入标准呢？</h2>
+<p>2016 年又有了解决这个问题的新提案，<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0424r0.pdf" target="_blank" rel="noopener">p0424r0</a>。</p>
+<p>最新版本是 2017 年 11 月的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0424r0.pdf" target="_blank" rel="noopener">p0424r2</a>。</p>
+<p>写出来的话大概是这个样子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;type_traits&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">const</span> <span class="keyword">auto</span>&amp; V&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ConstantReference</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span>&amp; value = V;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">auto</span>&amp; str&gt;</span><br><span class="line"><span class="keyword">constexpr</span> ConstantReference&lt;str&gt; <span class="keyword">operator</span><span class="string">""</span> _fuck()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Con, <span class="built_in">std</span>::<span class="keyword">size_t</span>... Indices&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="keyword">auto</span> <span class="title">Fuck</span><span class="params">(Con, <span class="built_in">std</span>::integer_sequence&lt;<span class="built_in">std</span>::<span class="keyword">size_t</span>, Indices...&gt;)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">std</span>::integer_sequence&lt;</span><br><span class="line">                <span class="built_in">std</span>::<span class="keyword">remove_cv_t</span>&lt;</span><br><span class="line">                    <span class="built_in">std</span>::<span class="keyword">remove_extent_t</span>&lt;</span><br><span class="line">                        <span class="built_in">std</span>::<span class="keyword">remove_reference_t</span>&lt;</span><br><span class="line">                            <span class="keyword">decltype</span>(Con::value)</span><br><span class="line">                        &gt;</span><br><span class="line">                    &gt;</span><br><span class="line">                &gt;, </span><br><span class="line">                Con::value[Indices]...</span><br><span class="line">            &gt;&#123;&#125;; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> STRLIT_TO_TYPE(strlit)      \</span></span><br><span class="line">    Fuck(                           \</span><br><span class="line">        strlit##_fuck,              \</span><br><span class="line">        <span class="built_in">std</span>::make_index_sequence&lt;   \</span><br><span class="line">            <span class="built_in">std</span>::extent_v&lt;          \</span><br><span class="line">                <span class="built_in">std</span>::<span class="keyword">remove_reference_t</span>&lt; \</span><br><span class="line">                    <span class="keyword">decltype</span>(strlit)\</span><br><span class="line">                &gt;                   \</span><br><span class="line">            &gt;                       \</span><br><span class="line">        &gt;&#123;&#125;                         \</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static_assert</span>(</span><br><span class="line">        <span class="built_in">std</span>::is_same_v&lt;</span><br><span class="line">            <span class="keyword">decltype</span>(STRLIT_TO_TYPE(<span class="string">"abc"</span>)),</span><br><span class="line">            <span class="built_in">std</span>::integer_sequence&lt;<span class="keyword">char</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>,<span class="number">0</span>&gt;</span><br><span class="line">        &gt;,</span><br><span class="line">        <span class="string">"Fuck"</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="section">18.3.5</h2>
+<p>看到 <a href="https://github.com/boostorg/hana/blob/master/include/boost/hana/string.hpp#L86" target="_blank" rel="noopener">hana 的实现</a>了 真是令人耳目一新的奇技淫巧 hana 作者太强了</p>
+<h2 id="section-1">18.3.18</h2>
+<p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r0.pdf" target="_blank" rel="noopener">P0732</a> 提出了一种更棒的方法，下面直接引用其中给出的例程</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> <span class="built_in">std</span> &#123;</span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> CharT, <span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">basic_fixed_string</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        <span class="function"><span class="keyword">constexpr</span> <span class="title">basic_fixed_string</span><span class="params">(<span class="keyword">const</span> CharT (&amp;foo)[N])</span></span></span><br><span class="line"><span class="function">        </span>&#123; <span class="built_in">std</span>::copy(foo, foo+N, m_data); &#125;</span><br><span class="line">        <span class="keyword">auto</span> <span class="keyword">operator</span>&lt;=&gt;(<span class="keyword">const</span> basic_fixed_string &amp;,</span><br><span class="line">                         <span class="keyword">const</span> basic_fixed_string &amp;) = <span class="keyword">default</span>;</span><br><span class="line">        CharT m_data[N];</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> CharT, <span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    basic_fixed_string(<span class="keyword">const</span> CharT (&amp;str)[N])-&gt;basic_fixed_string&lt;CharT, N<span class="number">-1</span>&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    <span class="keyword">using</span> fixed_string = basic_fixed_string&lt;<span class="keyword">char</span>, N&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="built_in">std</span>::<span class="keyword">size_t</span> N, <span class="built_in">std</span>::fixed_string&lt;N&gt; Str&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> hello_A = A&lt;<span class="number">5</span>, <span class="string">"hello"</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#注意"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#我觉得我可以写一个趣味小故事了"><span class="toc-number">2.</span> <span class="toc-text">我觉得我可以写一个趣味小故事了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么这么好的feature不能想办法加入标准呢"><span class="toc-number">3.</span> <span class="toc-text">为什么这么好的feature不能想办法加入标准呢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#section"><span class="toc-number">4.</span> <span class="toc-text">18.3.5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#section-1"><span class="toc-number">5.</span> <span class="toc-text">18.3.18</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&text=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&is_video=false&description=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 如何把字符串字面量的内容映射到类型&body=Check out this article: https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&title=C++ 如何把字符串字面量的内容映射到类型"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/2018/03/18/how-to-map-string-literal-to-type-in-cpp/&name=C++ 如何把字符串字面量的内容映射到类型&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2019 Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+    <!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<!-- clipboard -->
+
+  <script src="/lib/clipboard/clipboard.min.js"></script>
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight .code pre").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      target: function(trigger) {
+        return trigger.nextElementSibling;
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+    
+    
+  
+      
+  
+      
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" crossorigin="anonymous"></script>
+        <script
+          defer
+          src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js"
+          crossorigin="anonymous"
+          onload="renderMathInElement(document.body)">
+        </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+      
+  
+    
+  
+
+</body>
+</html>

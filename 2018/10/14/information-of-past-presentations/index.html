@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang=en>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="talk.gif  2017年 11月 泛型与 \(STL\)，本科 C++ 程序设计 演讲 获取 PPT： 参考 \([1]\) 2018年 6月\(^1\) 泛型与 \(STL\)，校 ACM 集训队 演讲 获取 PPT： OneDrive, PDF 2018年 10月 \(Haskell\) 与纯函数式编程语言，科技创新协会 分享 获取 PPT： OneDrive, PDF 2019年 4">
+<meta name="keywords" content="presentation,information">
+<meta property="og:type" content="article">
+<meta property="og:title" content="过往演讲及分享的整理与资料公开">
+<meta property="og:url" content="https://imtwice.com/2018/10/14/information-of-past-presentations/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="talk.gif  2017年 11月 泛型与 \(STL\)，本科 C++ 程序设计 演讲 获取 PPT： 参考 \([1]\) 2018年 6月\(^1\) 泛型与 \(STL\)，校 ACM 集训队 演讲 获取 PPT： OneDrive, PDF 2018年 10月 \(Haskell\) 与纯函数式编程语言，科技创新协会 分享 获取 PPT： OneDrive, PDF 2019年 4">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://imtwice.com/images/source_postsinformation-of-past-presentations/talk.gif">
+<meta property="og:image" content="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png">
+<meta property="og:updated_time" content="2019-10-05T14:06:02.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="过往演讲及分享的整理与资料公开">
+<meta name="twitter:description" content="talk.gif  2017年 11月 泛型与 \(STL\)，本科 C++ 程序设计 演讲 获取 PPT： 参考 \([1]\) 2018年 6月\(^1\) 泛型与 \(STL\)，校 ACM 集训队 演讲 获取 PPT： OneDrive, PDF 2018年 10月 \(Haskell\) 与纯函数式编程语言，科技创新协会 分享 获取 PPT： OneDrive, PDF 2019年 4">
+<meta name="twitter:image" content="https://imtwice.com/images/source_postsinformation-of-past-presentations/talk.gif">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>过往演讲及分享的整理与资料公开</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- persian styles -->
+    
+      <link rel="stylesheet" href="/css/rtl.css">
+    
+    <!-- rss --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+    
+    
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2018/10/19/cpp-fall-talk/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2018/10/01/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/2018/10/14/information-of-past-presentations/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&text=过往演讲及分享的整理与资料公开"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&is_video=false&description=过往演讲及分享的整理与资料公开"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=过往演讲及分享的整理与资料公开&body=Check out this article: https://imtwice.com/2018/10/14/information-of-past-presentations/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&name=过往演讲及分享的整理与资料公开&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#年-11月"><span class="toc-number">1.</span> <span class="toc-text">2017年 11月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-6月1"><span class="toc-number">2.</span> <span class="toc-text">2018年 6月\(^1\)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-10月"><span class="toc-number">3.</span> <span class="toc-text">2018年 10月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-4月"><span class="toc-number">4.</span> <span class="toc-text">2019年 4月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注意"><span class="toc-number">5.</span> <span class="toc-text">注意</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        过往演讲及分享的整理与资料公开
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">I'm Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-10-14T06:46:00.000Z" itemprop="datePublished">2018-10-14</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/collection/">collection</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/information/">information</a>, <a class="tag-link" href="/tags/presentation/">presentation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <figure>
+<img src="/images/source_postsinformation-of-past-presentations/talk.gif" alt><figcaption>talk.gif</figcaption>
+</figure>
+<h2 id="年-11月">2017年 11月</h2>
+<p><strong>泛型与 <span class="math inline">\(STL\)</span></strong>，本科 C++ 程序设计 演讲</p>
+<p>获取 PPT： 参考 <span class="math inline">\([1]\)</span></p>
+<h2 id="年-6月1">2018年 6月<span class="math inline">\(^1\)</span></h2>
+<p><strong>泛型与 <span class="math inline">\(STL\)</span></strong>，校 ACM 集训队 演讲</p>
+<p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTl1A4J1gUu_SJYYZ9" target="_blank" rel="noopener">OneDrive, PDF</a></p>
+<h2 id="年-10月">2018年 10月</h2>
+<p><strong><span class="math inline">\(Haskell\)</span> 与纯函数式编程语言</strong>，科技创新协会 分享</p>
+<p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTl0654hq_BwTuh2oR" target="_blank" rel="noopener">OneDrive, PDF</a></p>
+<h2 id="年-4月">2019年 4月</h2>
+<p><strong>A brief introduction to x86 OS kernel</strong>，本科操作系统程序设计 演讲</p>
+<p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTrgA1VTP3YYWqCTdR" target="_blank" rel="noopener">OneDrive, PDF</a></p>
+<h2 id="注意">注意</h2>
+<p><a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener"><img src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" alt="license-logo"></a></p>
+<ul>
+<li>所有公开的资料采用 <a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">知识共享署名-非商业性使用-禁止演绎 4.0</a> 国际许可协议进行许可</li>
+<li>直到本文最后更新时，位于中国大陆的访问者可能需要一些特殊的姿势访问 OneDrive 分享链接</li>
+<li>封面图出自番剧《佐贺偶像是传奇》</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#年-11月"><span class="toc-number">1.</span> <span class="toc-text">2017年 11月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-6月1"><span class="toc-number">2.</span> <span class="toc-text">2018年 6月\(^1\)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-10月"><span class="toc-number">3.</span> <span class="toc-text">2018年 10月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#年-4月"><span class="toc-number">4.</span> <span class="toc-text">2019年 4月</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注意"><span class="toc-number">5.</span> <span class="toc-text">注意</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/2018/10/14/information-of-past-presentations/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&text=过往演讲及分享的整理与资料公开"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&is_video=false&description=过往演讲及分享的整理与资料公开"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=过往演讲及分享的整理与资料公开&body=Check out this article: https://imtwice.com/2018/10/14/information-of-past-presentations/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&title=过往演讲及分享的整理与资料公开"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/2018/10/14/information-of-past-presentations/&name=过往演讲及分享的整理与资料公开&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2019 Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+    <!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<!-- clipboard -->
+
+  <script src="/lib/clipboard/clipboard.min.js"></script>
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight .code pre").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      target: function(trigger) {
+        return trigger.nextElementSibling;
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+    
+    
+  
+      
+  
+      
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" crossorigin="anonymous"></script>
+        <script
+          defer
+          src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js"
+          crossorigin="anonymous"
+          onload="renderMathInElement(document.body)">
+        </script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+      
+  
+    
+  
+
+</body>
+</html>
