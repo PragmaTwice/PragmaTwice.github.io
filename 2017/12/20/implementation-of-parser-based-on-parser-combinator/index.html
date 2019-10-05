@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/design-show.png">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/impl-show.png">
-<meta property="og:updated_time" content="2019-10-05T14:06:02.556Z">
+<meta property="og:updated_time" content="2019-10-05T14:18:28.759Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于解析器组合子的文法解析器的实现">
 <meta name="twitter:description" content="## 背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　 　　上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。">
@@ -107,7 +107,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#理论基础"><span class="toc-number">1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#目的"><span class="toc-number">2.</span> <span class="toc-text">目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总体设计"><span class="toc-number">3.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体实现"><span class="toc-number">4.</span> <span class="toc-text">具体实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关键问题及其解决方法"><span class="toc-number">5.</span> <span class="toc-text">关键问题及其解决方法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录"><span class="toc-number">7.</span> <span class="toc-text">附录：</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#理论基础"><span class="toc-number">1.</span> <span class="toc-text">理论基础</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ll分析器"><span class="toc-number">1.1.</span> <span class="toc-text">LL分析器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#目的"><span class="toc-number">2.</span> <span class="toc-text">目的</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#选用什么文法"><span class="toc-number">2.1.</span> <span class="toc-text">选用什么文法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#怎么构建组合子"><span class="toc-number">2.2.</span> <span class="toc-text">怎么构建组合子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总体设计"><span class="toc-number">3.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体实现"><span class="toc-number">4.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#basictree-泛型树"><span class="toc-number">4.1.</span> <span class="toc-text">BasicTree 泛型树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparseunit-泛型语法单元"><span class="toc-number">4.2.</span> <span class="toc-text">BasicParseUnit 泛型语法单元</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparsetree-泛型语法树"><span class="toc-number">4.3.</span> <span class="toc-text">BasicParseTree 泛型语法树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparsercombinator-泛型解析器组合子"><span class="toc-number">4.4.</span> <span class="toc-text">BasicParserCombinator 泛型解析器组合子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparser-泛型解析器"><span class="toc-number">4.5.</span> <span class="toc-text">BasicParser 泛型解析器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关键问题及其解决方法"><span class="toc-number">5.</span> <span class="toc-text">关键问题及其解决方法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么使用泛型泛型是否是过度设计"><span class="toc-number">5.1.</span> <span class="toc-text">为什么使用泛型，泛型是否是过度设计？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么混合处理词法解析和文法解析"><span class="toc-number">5.2.</span> <span class="toc-text">为什么混合处理词法解析和文法解析？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录"><span class="toc-number">7.</span> <span class="toc-text">附录：</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -156,14 +156,18 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p><img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt="chtholly-in-comic"> ## <em>背景</em> 　　<em>毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。</em></p>
+    <p><img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt="chtholly-in-comic"> ## <em>背景</em></p>
+<p>　　<em>毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。</em></p>
 <p>　　<em>1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。</em> 　　 　　<em>上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上，几乎所有程序设计语言都是通过上下文无关文法来定义的。另一方面，上下文无关文法又足够简单，使得我们可以构造有效的分析算法来检验一个给定字串是否是由某个上下文无关文法产生的。</em></p>
 <h2 id="理论基础">理论基础</h2>
-<p><strong>LL分析器</strong> 　　LL分析器是一种处理某些上下文无关文法的自顶向下分析器。它通常被称为是“递归下降”的，这与自底向上的LR分析器的特点“规约上升”相反。它从左到右处理输入，再对句型执行最左推导出语法树。 　　 <strong>组合子逻辑</strong> 　　组合子逻辑是等价于lambda演算的计算模型，可以被看作是lambda演算的变体，它把lambda表达式（用来允许函数抽象）替代为组合子的有限集合，它们是不包含自由变量的原始函数。 　　 <strong>解析器组合子</strong> 　　解析器组合子是一个高阶函数，接受几个解析器作为输入，并返回一个新的解析器作为输出。在这种情况下，解析器是一个接受字符串作为输入并返回一些结构作为输出的函数，通常是一个解析树或一组表示解析成功停止的字符串中的位置。 　　解析器组合子实现了递归下降解析策略，有助于模块化分段构建和测试。这种解析技术被称为组合式解析。使用组合子构建的解析器可以直接构建，可读，模块化，结构良好，易于维护。它们已被广泛用于编译器和处理器的原型。</p>
+<h3 id="ll分析器">LL分析器</h3>
+<p>　　LL分析器是一种处理某些上下文无关文法的自顶向下分析器。它通常被称为是“递归下降”的，这与自底向上的LR分析器的特点“规约上升”相反。它从左到右处理输入，再对句型执行最左推导出语法树。 　　 ### 组合子逻辑 　　组合子逻辑是等价于lambda演算的计算模型，可以被看作是lambda演算的变体，它把lambda表达式（用来允许函数抽象）替代为组合子的有限集合，它们是不包含自由变量的原始函数。 　　 ### 解析器组合子 　　解析器组合子是一个高阶函数，接受几个解析器作为输入，并返回一个新的解析器作为输出。在这种情况下，解析器是一个接受字符串作为输入并返回一些结构作为输出的函数，通常是一个解析树或一组表示解析成功停止的字符串中的位置。 　　解析器组合子实现了递归下降解析策略，有助于模块化分段构建和测试。这种解析技术被称为组合式解析。使用组合子构建的解析器可以直接构建，可读，模块化，结构良好，易于维护。它们已被广泛用于编译器和处理器的原型。</p>
 <h2 id="目的">目的</h2>
-<p>　　用 C++ 实现解析器组合子，并在解析器组合子的基础上实现解析器，即实现将符合某个文法的语言代码解析成抽象语法树。 　　 <strong>为什么用 C++</strong> 　　在C++11标准（ISO/IEC14882:2011）发布后，现代C++ 拥有了更强的表达能力，lambda表达式使得函数式写法及高阶函数的表达在C++中实现起来更为容易。C++在类型表达和元编程方面有着一定的优势。本次我选用 C++17标准（ISO/IEC14882:2017）实现解析器。</p>
-<p><strong>选用什么文法</strong> 　　我以类BNF范式实现了一个简单的语言，在文法上语言更契合LISP的思想：没有语句，只有表达式。但语言并没有使用S表达式，而是使用数学表达式和c-style的风格构建基础表达式。</p>
-<p><strong>怎么构建组合子</strong> 　　我尝试使用 C++ 中运算符重载的特性，以简单的语法快速地构建高阶函数，使得组合子在被使用的时候能够贴近于 BNF 表达式的书写习惯，比如克莱尼星号（*），存在一个或多个（+），推断为A或者B（A|B），推断为A B(A,B)，可选推断（~） 等等。</p>
+<p>　　用 C++ 实现解析器组合子，并在解析器组合子的基础上实现解析器，即实现将符合某个文法的语言代码解析成抽象语法树。 　　 ### 为什么用 C++ 　　在C++11标准（ISO/IEC14882:2011）发布后，现代C++ 拥有了更强的表达能力，lambda表达式使得函数式写法及高阶函数的表达在C++中实现起来更为容易。C++在类型表达和元编程方面有着一定的优势。本次我选用 C++17标准（ISO/IEC14882:2017）实现解析器。</p>
+<h3 id="选用什么文法">选用什么文法</h3>
+<p>　　我以类BNF范式实现了一个简单的语言，在文法上语言更契合LISP的思想：没有语句，只有表达式。但语言并没有使用S表达式，而是使用数学表达式和c-style的风格构建基础表达式。</p>
+<h3 id="怎么构建组合子">怎么构建组合子</h3>
+<p>　　我尝试使用 C++ 中运算符重载的特性，以简单的语法快速地构建高阶函数，使得组合子在被使用的时候能够贴近于 BNF 表达式的书写习惯，比如克莱尼星号（*），存在一个或多个（+），推断为A或者B（A|B），推断为A B(A,B)，可选推断（~） 等等。</p>
 <h2 id="总体设计">总体设计</h2>
 <figure>
 <img src="/images/implementation-of-parser-based-on-parser-combinator/design-show.png" alt><figcaption>design-show</figcaption>
@@ -172,19 +176,26 @@
 <figure>
 <img src="/images/implementation-of-parser-based-on-parser-combinator/impl-show.png" alt><figcaption>impl-show</figcaption>
 </figure>
-<p><strong><code>BasicTree</code> 泛型树</strong> 　　泛型树旨在构建一颗接受泛型元素的树状图结构。 其中每颗子树的子节点的数量是不被限制，且是动态确定的。且每颗子树都知道其父节点的信息，即可以在任意时刻轻易地回溯。</p>
+<h3 id="basictree-泛型树"><code>BasicTree</code> 泛型树</h3>
+<p>　　泛型树旨在构建一颗接受泛型元素的树状图结构。 其中每颗子树的子节点的数量是不被限制，且是动态确定的。且每颗子树都知道其父节点的信息，即可以在任意时刻轻易地回溯。</p>
 <p>　　遍历或修改树中的元素以内置类 <code>Visitor</code> 或 <code>Modifier</code> 完成。</p>
 <p>　　<code>Visitor</code> 表示了正在对某个节点进行访问，提供了访问父节点，上/下一个兄弟节点或者上/下一个子节点的方法。但 <code>Visitor</code> 不具备增加/删除节点的能力。</p>
 <p>　　<code>Modifier</code> 是 <code>Visitor</code> 的一个子类（即其共有继承了<code>Visitor</code>），所以其拥有<code>Visitor</code>的全部功能，且<code>Modifier</code>提供了对树的结构的修改操作，包括增加/删除节点，交换节点或是移动节点。</p>
-<p><strong><code>BasicParseUnit</code> 泛型语法单元</strong> 　　泛型语法单元旨在表示一个终结符或非终结符，它携带了一个终结符或非终结符的全部信息。</p>
-<p><strong><code>BasicParseTree</code> 泛型语法树</strong> 　　泛型语法树是泛型树对于泛型语法单元的特化。</p>
-<p><strong><code>BasicParserCombinator</code> 泛型解析器组合子</strong> 　　泛型解析器组合子用于生成解析器，其由一系列高阶函数作为静态方法，接受特定类型的函数，返回特定类型的函数，即解析器组合子进行的是对函数的处理，将一系列函数以不同的语义进行不同的组合操作，以实现文法的构建。</p>
+<h3 id="basicparseunit-泛型语法单元"><code>BasicParseUnit</code> 泛型语法单元</h3>
+<p>　　泛型语法单元旨在表示一个终结符或非终结符，它携带了一个终结符或非终结符的全部信息。</p>
+<h3 id="basicparsetree-泛型语法树"><code>BasicParseTree</code> 泛型语法树</h3>
+<p>　　泛型语法树是泛型树对于泛型语法单元的特化。</p>
+<h3 id="basicparsercombinator-泛型解析器组合子"><code>BasicParserCombinator</code> 泛型解析器组合子</h3>
+<p>　　泛型解析器组合子用于生成解析器，其由一系列高阶函数作为静态方法，接受特定类型的函数，返回特定类型的函数，即解析器组合子进行的是对函数的处理，将一系列函数以不同的语义进行不同的组合操作，以实现文法的构建。</p>
 <p>　　其内嵌类 <code>Process</code> 是对某个函数的封装，并增加了 <code>isOptional</code> 属性，每个 <code>Process</code> 都是对某个接受 <code>Info</code> 类型对象且返回 <code>Info</code> 类型对象的函数的封装。每个 <code>Info</code> 类型都携带目前被处理的代码的 View 信息和语法树上对于目前的某个节点的 <code>Modifier</code> 信息。</p>
 <p>　　解析器组合子的大多数静态方法或是对操作符重载的友元函数都接受一或多个 <code>Process</code> 对象而后返回一个新的 <code>Process</code> 对象。这个新的 <code>Process</code>对象就是一条被结合出的新的文法产生式。</p>
-<p><strong><code>BasicParser</code> 泛型解析器</strong> 　　泛型解析器是对泛型解析器组合子的应用。在语义上讲，其继承了泛型解析器组合子。需要注意的是解析器在实现上大量使用了C++17的 <code>inline variable</code>，以更清晰地写出文法规则。解析器使用组合子生成所有的产生式（文法规则），以体现组合子在实际应用和写法上的优势。</p>
+<h3 id="basicparser-泛型解析器"><code>BasicParser</code> 泛型解析器</h3>
+<p>　　泛型解析器是对泛型解析器组合子的应用。在语义上讲，其继承了泛型解析器组合子。需要注意的是解析器在实现上大量使用了C++17的 <code>inline variable</code>，以更清晰地写出文法规则。解析器使用组合子生成所有的产生式（文法规则），以体现组合子在实际应用和写法上的优势。</p>
 <h2 id="关键问题及其解决方法">关键问题及其解决方法：</h2>
-<p><strong>为什么使用泛型，泛型是否是过度设计？</strong> 　　使用泛型是为了根据被处理的语言代码的编码不同进行不同的处理，即选择不同的 <code>StringView</code> 进行处理。由于已经对于所有的泛型解析器/组合子特化了模板参数为 <code>std::string_view</code> 的类型，所以实际上没有增加使用难度，也没有对表层API进行任何更改。</p>
-<p><strong>为什么混合处理词法解析和文法解析？</strong> 　　因为本身词法就可以看作文法的一部分，词法和文法区别表现在工程上，即表现在语法树的构建和（大部分语言中）空白字符的处理上。通过某些写法，我用组合子以同一范式写出了词法和文法的产生式，并处理了词法的贪心匹配需求。</p>
+<h3 id="为什么使用泛型泛型是否是过度设计">为什么使用泛型，泛型是否是过度设计？</h3>
+<p>　　使用泛型是为了根据被处理的语言代码的编码不同进行不同的处理，即选择不同的 <code>StringView</code> 进行处理。由于已经对于所有的泛型解析器/组合子特化了模板参数为 <code>std::string_view</code> 的类型，所以实际上没有增加使用难度，也没有对表层API进行任何更改。</p>
+<h3 id="为什么混合处理词法解析和文法解析">为什么混合处理词法解析和文法解析？</h3>
+<p>　　因为本身词法就可以看作文法的一部分，词法和文法区别表现在工程上，即表现在语法树的构建和（大部分语言中）空白字符的处理上。通过某些写法，我用组合子以同一范式写出了词法和文法的产生式，并处理了词法的贪心匹配需求。</p>
 <h2 id="总结">总结：</h2>
 <p>　　虽然解析器组合子对于递归下降的解析没有做出任何的复杂度改善和优化（即在自顶向下解析中，当解析模棱两可的上下文无关语法时，组合式分析需要指数级的时间和空间复杂度），但解析器组合子大幅度改善了硬编码的文法解析实现的写法，使得使用组合器构建的解析器有着易于构建，可读，模块化，结构合理，易于维护的特点。</p>
 <p>　　本项目的解析器组合子并没有做到自动消除左递归，即在处理左递归产生式时，解析器永远不会被终止。但可以了解到的是，Frost和Hafiz在2006年描述了一种识别算法，该算法可以接受具有直接左递归规则的歧义语法，并且在2007年该算法被扩展为一个完整的分析算法，以适应间接以及多项式级时间复杂度的直接左递归，并用Haskell实现了该算法。同样的，早在1996年，Frost和Szydlowski就展示了解析器组合子如何使用记忆化来使时间复杂度减少到多项式级。</p>
@@ -233,7 +244,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#理论基础"><span class="toc-number">1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#目的"><span class="toc-number">2.</span> <span class="toc-text">目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总体设计"><span class="toc-number">3.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体实现"><span class="toc-number">4.</span> <span class="toc-text">具体实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关键问题及其解决方法"><span class="toc-number">5.</span> <span class="toc-text">关键问题及其解决方法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录"><span class="toc-number">7.</span> <span class="toc-text">附录：</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#理论基础"><span class="toc-number">1.</span> <span class="toc-text">理论基础</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ll分析器"><span class="toc-number">1.1.</span> <span class="toc-text">LL分析器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#目的"><span class="toc-number">2.</span> <span class="toc-text">目的</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#选用什么文法"><span class="toc-number">2.1.</span> <span class="toc-text">选用什么文法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#怎么构建组合子"><span class="toc-number">2.2.</span> <span class="toc-text">怎么构建组合子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总体设计"><span class="toc-number">3.</span> <span class="toc-text">总体设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体实现"><span class="toc-number">4.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#basictree-泛型树"><span class="toc-number">4.1.</span> <span class="toc-text">BasicTree 泛型树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparseunit-泛型语法单元"><span class="toc-number">4.2.</span> <span class="toc-text">BasicParseUnit 泛型语法单元</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparsetree-泛型语法树"><span class="toc-number">4.3.</span> <span class="toc-text">BasicParseTree 泛型语法树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparsercombinator-泛型解析器组合子"><span class="toc-number">4.4.</span> <span class="toc-text">BasicParserCombinator 泛型解析器组合子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#basicparser-泛型解析器"><span class="toc-number">4.5.</span> <span class="toc-text">BasicParser 泛型解析器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关键问题及其解决方法"><span class="toc-number">5.</span> <span class="toc-text">关键问题及其解决方法：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么使用泛型泛型是否是过度设计"><span class="toc-number">5.1.</span> <span class="toc-text">为什么使用泛型，泛型是否是过度设计？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么混合处理词法解析和文法解析"><span class="toc-number">5.2.</span> <span class="toc-text">为什么混合处理词法解析和文法解析？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录"><span class="toc-number">7.</span> <span class="toc-text">附录：</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
