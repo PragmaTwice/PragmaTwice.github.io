@@ -6,18 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
+    <meta name="description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
 <meta name="keywords" content="clang,llvm,clang-tidy,checker">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何给 clang-tidy 写新 checker">
 <meta property="og:url" content="https://imtwice.com/2019/10/05/write-new-checker-for-clang-tidy/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
-<meta property="og:description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
+<meta property="og:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-10-05T16:20:08.296Z">
+<meta property="og:image" content="https://imtwice.com/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png">
+<meta property="og:updated_time" content="2019-10-05T16:28:09.276Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何给 clang-tidy 写新 checker">
-<meta name="twitter:description" content="clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 checker 都是针对某一特定问题的的检测器，如">
+<meta name="twitter:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
+<meta name="twitter:image" content="https://imtwice.com/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png">
     
     
         
@@ -150,7 +152,10 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="clang-tidy-里的-checker-起着着怎样的作用">clang-tidy 里的 checker 起着着怎样的作用</h1>
+    <figure>
+<img src="/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png" alt><figcaption>clang-tidy-in-clion</figcaption>
+</figure>
+<h1 id="clang-tidy-里的-checker-起着着怎样的作用">clang-tidy 里的 checker 起着着怎样的作用</h1>
 <p>clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。</p>
 <p>把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 <code>.cpp</code> 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。</p>
 <p>每个 checker 都是针对某一特定问题的的检测器，如 <a href="https://github.com/isocpp/CppCoreGuidelines" target="_blank" rel="noopener">CppCoreGuidelines</a> 是标准委员会提出的一些“最佳实践”，我们也可以称之为“规范”或者“约束”。而 clang-tidy 实现了对于每一个“规范”项的检查，如 <code>CppCoreGuidelines/AvoidGotoCheck</code> 实现了对于 <a href="http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto" target="_blank" rel="noopener">ES.76: Avoid goto</a> 的检查。</p>
