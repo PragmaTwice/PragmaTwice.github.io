@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>如何给 clang-tidy 写新 checker</title>
+      <link href="/2019/10/05/write-new-checker-for-clang-tidy/"/>
+      <url>/2019/10/05/write-new-checker-for-clang-tidy/</url>
+      
+        <content type="html"><![CDATA[<figure><img src="/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png" alt><figcaption>clang-tidy-in-clion</figcaption></figure><h2 id="clang-tidy-里的-checker-起着着怎样的作用">clang-tidy 里的 checker 起着着怎样的作用</h2><p>clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。</p><p>把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 <code>.cpp</code> 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。</p><p>每个 checker 都是针对某一特定问题的的检测器，如 <a href="https://github.com/isocpp/CppCoreGuidelines" target="_blank" rel="noopener">CppCoreGuidelines</a> 是标准委员会提出的一些“最佳实践”，我们也可以称之为“规范”或者“约束”。而 clang-tidy 实现了对于每一个“规范”项的检查，如 <code>CppCoreGuidelines/AvoidGotoCheck</code> 实现了对于 <a href="http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto" target="_blank" rel="noopener">ES.76: Avoid goto</a> 的检查。</p><p>我们可以做个小试验： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    loop: <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"hello"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">goto</span> loop;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>然后执行 clang-tidy 以检测文件（设以上代码保存到 test.cpp） <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> clang-tidy --checks="cppcoreguidelines-avoid-goto" test.cpp --</span><br></pre></td></tr></table></figure></p><p>很多人会好奇为什么语句的末尾有 <code>--</code>，所以我决定不做解释。我们发现有类似以下的输出： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1 warning generated.</span><br><span class="line">test.cpp:5:2: warning: avoid using &apos;goto&apos; for flow control [cppcoreguidelines-avoid-goto]</span><br><span class="line">        goto loop;</span><br><span class="line">        ^</span><br><span class="line">test.cpp:4:2: note: label defined here</span><br><span class="line">        loop: f();</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure></p><p>clang-tidy 检测出了 goto 语句处和与之对应的标签的定义处。</p><p>不过我相信很多人会抱怨这个检查太 trivial，下面我们会写较复杂的 checker 以体验 clang-tidy 借助于强大的 LLVM/clang 而具有的无穷威力。</p><h2 id="开始行动">开始行动</h2><p>首先，本篇文章并不包含环境的搭建、代码的详细解读、API 的说明，也并不给出源代码。其次，我假设读者熟悉 C++ （<code>std&gt;=11</code>）；编译器前端的知识，包括 parser 等；以及软件工程知识，如 visitor pattern。</p><p>clang-tidy 提供了一个名为 <code>add_new_check</code> 的脚本文件（用 Python 编写），用以快速生成新的 checker，我们可以借助他来 init。之后我真诚地推荐读者先 cmake 出平台特定的可构建项目后构建整个项目，在这个过程中你可以选择看个电影、陪妹子吃顿饭、唱K，总之请不要把时光葬送在盯着进度条看上。</p><h3 id="matcher函数式与编译错误">matcher：函数式与编译错误</h3><p>LibASTMatchers 是 clang 提供的一种 DSL（之所以称之为 DSL 是因为其与正常的执行逻辑不同），以谓词的方式给出对节点的约束，以找到符合约束的节点。</p><p>写起来有种 SQL 的查询语句一样的感觉（或是其他 query language），有种函数式的手感。但众所周知，这个库用的一些算不上奇技淫巧的“技巧”来完成，所以如果不慎用错函数，编译错误信息简直难以看懂，哦不，根本看不懂。不过没到元编程的那种境界，如果你比较熟悉 C++，找到错误还是不难的（盲猜）。</p><p>对于比较简单的，不含递归的检查，我们可以使用 matcher 很轻易的完成，这是 matcher 最大的优点。reference 上有个不错的例子（我做了修改）： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">recordDecl(hasDescendant(</span><br><span class="line">    ifStmt(hasThen(</span><br><span class="line">        stmt(hasDescendant(</span><br><span class="line">            ifStmt()))))))</span><br></pre></td></tr></table></figure></p><p>我们可以调出 query language 那种特定的脑回路来读这段代码：有一个 <code>recordDecl</code>（记录声明，在 c++ 里可以看作 <code>struct</code>/<code>class</code>），它有这样的后代（即 AST 上这个 <code>recordDecl</code> 节点的后代节点），which is 一个 <code>ifStmt</code>，这个 <code>ifStmt</code> 的 true 分支语句中有后代为 <code>ifStmt</code>，整体来说非常易懂且简洁。</p><p>我们会发现库中提供了三类匹配器：</p><ul><li>Node Matchers: 匹配某个类型的节点，如上面的 <code>recordDecl</code>、<code>ifStmt</code></li><li>Narrowing Matchers: 匹配节点的某种属性，上面的语句中没有出现，但这一类应该最容易理解，如描述某个 <code>CXXMethodDecl</code> 是否被 const 修饰的 <code>isConst</code></li><li>Traversal Matchers: 遍历匹配器，用来描述节点间关系，如上面的 <code>hasDescendant</code>、<code>hasThen</code></li></ul><p>那么我们怎么表达逻辑稍微复杂点的匹配查询呢，我们需要一些可以组合的、通用的谓词：</p><ul><li>all: 描述某些谓词全部成立</li><li>any: 描述某些谓词至少有一个成立</li><li>anything: 这个谓词始终成立</li><li>unless: 描述某个谓词不成立，类似于取非</li></ul><p>还有一些比较通用的谓词，如 forEach, has 等，顾名思义，请查看文档。</p><p>掌握了这些知识，我们就可以根据文档做一些练习，如：</p><ul><li>写一个检测 sizeof 是否只作用于变量（允许 id expr 出现）或是类型的 matcher</li><li>（选做）并在诊断信息中输出 sizeof 中的表达式及其类型</li></ul><h3 id="visitor真香">visitor：真香</h3><p>当遇到非常复杂的逻辑时，一个 matcher 可能很难或是无法完成任务，多个 matcher 或许很复杂或是也无法完成任务，我们可以配合使用 visitor 来完成。</p><p>我们只介绍 <code>StmtVisitor</code>，顾名思义它可以遍历 AST 中的 <code>Stmt</code> 节点，我们需要知道的是在 Clang 里 <code>Expr</code> 继承了 <code>Stmt</code>，所以我们可以用它访问语句和表达式。</p><p>构建一个可以 work 的 vistor 很简单，我们只需要继承 <code>StmtVistor</code>，然后重写 <code>VisitStmt</code> 以遍历每个 <code>Stmt</code> 节点的所有子节点，如： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VisitStmt</span><span class="params">(Stmt *stmt)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> *child : stmt-&gt;children()) &#123;</span><br><span class="line">    Visit(child);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>这样我们就可以访问到全部的节点，然后我们可以根据需要重写其他的方法，以完成特定的任务，如重写 <code>VisitCXXMemberCallExpr</code> 以在访问到 <code>CXXMemberCallExpr</code> 时做一些事情。</p><p>好了，让我们开始练习：</p><ul><li>实现针对《Effective C++》中第九条“在析构/构造时不要调用虚函数” 的检测器</li><li>（选做）输出时请指明在 ctor/dtor 中哪一个调用涉及了虚函数，如果这个调用本身不是虚函数，那么请指出这个调用中在那个地方调用了虚函数</li></ul><p>思路提示：当然是 DFS 啦</p><p>（答案可来信索取，自己完成或许更有成就感）</p><h2 id="引用">引用</h2><ol type="1"><li><a href="https://clang.llvm.org/extra/clang-tidy/" target="_blank" rel="noopener">Clang-Tidy - Clang documentation</a></li><li><a href="https://clang.llvm.org/docs/LibASTMatchers.html" target="_blank" rel="noopener">Matching the Clang AST - Clang documentation</a></li><li><a href="https://clang.llvm.org/doxygen/classclang_1_1StmtVisitor.html" target="_blank" rel="noopener">clang::StmtVisitor&lt;ImplClass, RetTy, ParamTys&gt; Class Template Reference</a></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> clang </tag>
+            
+            <tag> llvm </tag>
+            
+            <tag> clang-tidy </tag>
+            
+            <tag> checker </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>C++需要反射吗</title>
+      <link href="/2019/06/28/does-cpp-need-reflection/"/>
+      <url>/2019/06/28/does-cpp-need-reflection/</url>
+      
+        <content type="html"><![CDATA[<h2 id="注意">注意</h2><p><img src="/images/zhihu/zhihu.jpg" alt="zhihu.jpg"> 本文旨在整理知乎上的回答，原答案链接请<a href="https://www.zhihu.com/question/268188946/answer/334037634" target="_blank" rel="noopener">戳这里</a>。</p><h2 id="c-需要静态编译期反射">C++ 需要静态（编译期）反射</h2><p>并且 WG21 正在为这一点而努力。具体请看 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2019/n4818.pdf" target="_blank" rel="noopener">N4818</a>（Reflection TS），以及可以吊打 N4818 的 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2019/p1717r0.pdf" target="_blank" rel="noopener">P1717</a>（extended P0712，最近很长时间没关注了，难道 Andrew Sutton 不想跟 Herb Sutter 一起玩儿了？），让我们感受一下里面的第一个例子：</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Types&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">tuple</span> &#123;</span></span><br><span class="line">    consteval &#123;</span><br><span class="line">        <span class="keyword">int</span> counter = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>... (meta::info type : reflexpr(Types)) &#123;</span><br><span class="line">            <span class="keyword">auto</span> fragment = __fragment struct &#123;</span><br><span class="line">                <span class="keyword">typename</span>(type) unqualid(<span class="string">"element_"</span>, counter);</span><br><span class="line">            &#125;;</span><br><span class="line">            -&gt; fragment;</span><br><span class="line">            ++counter;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">tuple&lt;<span class="keyword">bool</span>, <span class="keyword">char</span>, <span class="keyword">int</span>&gt; tup;</span><br></pre></td></tr></table></figure><p>在 tuple 被特化时大概将生成以下的代码： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Types&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">tuple</span> &#123;</span></span><br><span class="line">    <span class="keyword">bool</span> element0;</span><br><span class="line">    <span class="keyword">char</span> element1;</span><br><span class="line">    <span class="keyword">int</span> element2;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p><p>完全可以吊打传统的 tuple 实现方式（当然这只是个很不完备的小例子），包括恐怖的递归继承实现方式和比前者好一点的多继承实现方式。实际上我认为这可以一定程度上使得 C++ 远离许多奇技淫巧，可以让大家免于记忆一大堆由于语言设施不完备做出妥协而流传于世的 idioms 的痛苦。</p><h2 id="c-标准不需要动态运行期反射">C++ 标准不需要动态（运行期）反射</h2><p>或者说，我认为一旦有了静态反射，动态反射就完全可以由社区提供，比如 <a href="https://github.com/rttrorg/rttr" target="_blank" rel="noopener">RTTR</a>，当然我更倾向于认为大部分需求都能用静态反射解决。</p><p>所有说可以用 C++ 宏实现反射的人都是不负责任，宏的部分功能应该被静态反射淘汰，这种极其落后的语言设施应该被消灭掉。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> reflection </tag>
+            
+            <tag> zhihu </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>C++ 秋季漫谈</title>
+      <link href="/2018/10/19/cpp-fall-talk/"/>
+      <url>/2018/10/19/cpp-fall-talk/</url>
+      
+        <content type="html"><![CDATA[<figure><img src="/images/cpp-fall-talk/cpp-error.jpg" alt><figcaption>cpp-error</figcaption></figure><h2 id="序">序</h2><p>十月中旬<span class="math inline">\(^1\)</span>，WG21<span class="math inline">\(^2\)</span> 公开了整理出的十月份提案列表，很长。</p><p>委员会各种会议如火如荼，C++ 却已近秋。</p><p>Bjarne Stroustrup 在三月份写过题为 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0977r0.pdf" target="_blank" rel="noopener"><em>Remember the Vasa!</em></a> 的短文，提出了一个非常重要的忧虑 —— C++ 是否能够继续以目前的形式扩充。</p><p>这篇短文引出了一个现实，所有这些提案没有一个一致、可共享的目标。每个人分散地提出自己认为可行地修改，而所有人一起这样做就可能导致 Vasa<span class="math inline">\(^3\)</span> 式结果。</p><h2 id="上">上</h2><p>事到如今确实只能修补，但修补不是糊墙。</p><p>一个有趣的问题是，C++ 的优势是什么？</p><ul><li>直接编译到机器码，没有中间语言、没有 GC，适合性能需求高的场合或是搭建底层、接近硬件的系统</li><li>历史积淀深厚，有着一大堆各领域性能需求高的项目支撑，且在很大程度上完全兼容 C 或易于将 C 项目迁移到 C++ 编译环境；在大多数操作系统中都有相应的编译套件</li><li>较强大的静态类型系统，除了没有 sum type<span class="math inline">\(^4\)</span> 之外，其他方面的表现是强劲的，尤其是 C++11 及之后的标准，甚至部分标准库部件（如 <code>std::chrono</code>）以富类型的方式 ( type rich style ) 架构</li><li>支持多种范式而没有做太多约束，甚至最近加入了 contract based programming<span class="math inline">\(^5\)</span>，你可以用你自己喜欢的想法架构你的代码，唯一的缺点是，忍受略蹩脚的文法</li></ul><p>那么 c++ 到底需要什么？</p><h2 id="中">中</h2><p>关于这个问题 SG15<span class="math inline">\(^6\)</span> 最有发言权，十月份提案中有另一篇标题相似的短文 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1300r0.pdf" target="_blank" rel="noopener"><em>Remember the FORTRAN</em></a>，指出了 Modules TS<span class="math inline">\(^7\)</span> 在编译环境的核心问题。</p><p>当我们回顾 C++ 的工具链演变史，对比其他语言，我们可以很轻易地发现 —— C++ 在语言上缺乏模块系统，以及基于模块的依赖管理工具及其他工具。当 C++ 从 C 中继承了蠢萌的预处理器引入其他文件的机制时，已经存在的 Ada、ML 等语言早已有了模块系统。</p><p>甚至于说，C++ 在符号链接等方面的麻烦，要由 <code>#include</code> 等直接负责。甚至在 Modules TS 的设计时，由于要考虑到 <code>#include</code> 等预处理指令，也变得麻烦。</p><p>委员会部分成员最近致力于 <em>constexpr everywhere</em>，甚至希望将语言中的 <code>new</code> 以及周边标准作修改以适用于 <code>constexpr</code> <span class="math inline">\(^{8}\)</span>，以做到在编译期使用标准容器，如 <code>std::vector</code>。</p><p>当然这就引出一个巨大的问题 —— C++ 没有编译时反射。Reflection TS 由此而生，但设计的并不怎么样，甚至于 Function Reflection 这种最基本的东西都是后来补进去的<span class="math inline">\(^{9}\)</span>。C++ 太过于复杂以至于很难设计出完整的反射。</p><p>唯一值得探讨的我认为是 Herb Sutter 提出的 Metaclasses。当然这里重点并不是 Metaclasses 本身，而是跟随 Metaclasses 一起提出的、用作 Metaclasses 的基础设施支撑的一个提案<span class="math inline">\(^{10}\)</span>，其中的 <code>constexpr</code> block、<code>for...</code> statement、<code>declname</code> 以及并不基于模板的反射 API 都是非常棒的主意，可惜我认为近期<span class="math inline">\(^{11}\)</span>难以并入标准。</p><p>纵观目前活跃的提案，已经并入 C++20 的 部分Concepts TS<span class="math inline">\(^{12}\)</span>，以及 Contract<span class="math inline">\(^5\)</span> 都并不能给 C++ 带来决定性的变化，事实上甚至有不少质疑<span class="math inline">\(^{13}\)</span>，不过基于 Concepts 的 Ranges TS 以及众望所归的 Coroutines TS 被期冀有望<span class="math inline">\(^{14}\)</span>并入 C++20 确实是个好消息。</p><p>但是由于 Executor 未并入标准（甚至未作为 TS）<span class="math inline">\(^{15}\)</span>，许多基于它的设施不可能完整地在它之前并入标准。这其中包括了 Networking TS，当然值得一提的是 Networking 的主要部分并不依赖于 Executor<span class="math inline">\(^{16}\)</span>。</p><h2 id="下">下</h2><p>所有的这些都在传达着一个消息 —— C++ 身上的历史包袱重地令人叹惋，而 D、Rust 等（抱歉没有 Go）语言以重新设计的轻盈洁净的文法、语义试图创造一种更优雅地高性能编程环境。</p><p>如果 Modules 可以在近期并入标准，我大概还会吹 C++。</p><h3 id="年-2月补充">2019 年 2月补充</h3><p>综合 Toronto, Rapperswil, San Diego, Kona meeting 的结果， Modules, Ranges, Coroutines, Concepts, Contracts 都已经并入 C++20。</p><h3 id="年-7月补充">2019 年 7月补充</h3><p>在 Cologne meeting 上，Contracts 被移出 C++20。</p><h2 id="注">注</h2><p><span class="math inline">\([0]\)</span> 封面图来自于刘雨培的文章 <a href="https://zhuanlan.zhihu.com/p/24328534" target="_blank" rel="noopener">为什么不再想碰 C++</a></p><p><span class="math inline">\([1]\)</span> 具体为 2018 年 10 月 13 日</p><p><span class="math inline">\([2]\)</span> 指 JTC1/SC22/WG21，The C++ Standards Committee</p><p><span class="math inline">\([3]\)</span> <a href="https://en.wikipedia.org/wiki/Vasa_(ship)" target="_blank" rel="noopener">瓦萨号</a>，是瑞典国王古斯塔夫二世下令建造的一艘军舰</p><p><span class="math inline">\([4]\)</span> 通俗上称为 <a href="https://en.wikipedia.org/wiki/Tagged_union" target="_blank" rel="noopener">tagged union</a>，实际上 c++ 有这类提案，例如 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0095r2.html" target="_blank" rel="noopener">P0095</a></p><p><span class="math inline">\([5]\)</span> <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0542r4.html" target="_blank" rel="noopener">P0542</a>, Support for contract based programming in C++ （已并入 c++20）</p><p><span class="math inline">\([6]\)</span> 指 JTC1/SC22/WG21/SG15</p><p><span class="math inline">\([7]\)</span> 这里泛指 Modules TS 以及之后的 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1103r1.pdf" target="_blank" rel="noopener">Merging Modules</a>，下同</p><p><span class="math inline">\([8]\)</span> <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0784r1.html" target="_blank" rel="noopener">P0784</a>, Standard containers and constexpr</p><p><span class="math inline">\([9]\)</span> <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0670r4.html" target="_blank" rel="noopener">P0670</a>, Function reflection</p><p><span class="math inline">\([10]\)</span> <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0712r0.pdf" target="_blank" rel="noopener">P0712</a>, Implementing language support for compile-time metaprogramming</p><p><span class="math inline">\([11]\)</span> 在 C++ 标准化的尺度上，我认为 3-6 年可以算作近期</p><p><span class="math inline">\([12]\)</span> <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4674.pdf" target="_blank" rel="noopener">N4674</a>, Working Draft, C++ extensions for Concepts</p><p><span class="math inline">\([13]\)</span> 如对 Concepts TS 的质疑 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0726r0.html" target="_blank" rel="noopener">P0726</a></p><p><span class="math inline">\([14]\)</span> 见 <a href="https://herbsutter.com/2018/07/02/trip-report-summer-iso-c-standards-meeting-rapperswil" target="_blank" rel="noopener">Trip report: Summer ISO C++ standards meeting (Rapperswil)</a> 中的 <em>Whats's Next</em> 小节</p><p><span class="math inline">\([15]\)</span> <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1256r0.html" target="_blank" rel="noopener">P1256</a> 建议将其作为 TS 处理</p><p><span class="math inline">\([16]\)</span> 由此 <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1259r0.html" target="_blank" rel="noopener">P1259</a> 建议并入不依赖于 Executor 的那部分</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>过往演讲及分享的整理与资料公开</title>
+      <link href="/2018/10/14/information-of-past-presentations/"/>
+      <url>/2018/10/14/information-of-past-presentations/</url>
+      
+        <content type="html"><![CDATA[<figure><img src="/images/information-of-past-presentations/talk.gif" alt><figcaption>talk</figcaption></figure><h2 id="年-11月">2017年 11月</h2><p><strong>泛型与 <span class="math inline">\(STL\)</span></strong>，本科 C++ 程序设计 演讲</p><p>获取 PPT： 参考 <span class="math inline">\([1]\)</span></p><h2 id="年-6月1">2018年 6月<span class="math inline">\(^1\)</span></h2><p><strong>泛型与 <span class="math inline">\(STL\)</span></strong>，校 ACM 集训队 演讲</p><p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTl1A4J1gUu_SJYYZ9" target="_blank" rel="noopener">OneDrive, PDF</a></p><h2 id="年-10月">2018年 10月</h2><p><strong><span class="math inline">\(Haskell\)</span> 与纯函数式编程语言</strong>，科技创新协会 分享</p><p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTl0654hq_BwTuh2oR" target="_blank" rel="noopener">OneDrive, PDF</a></p><h2 id="年-4月">2019年 4月</h2><p><strong>A brief introduction to x86 OS kernel</strong>，本科操作系统程序设计 演讲</p><p>获取 PPT： <a href="https://1drv.ms/b/s!AqRWJ64OmjGTrgA1VTP3YYWqCTdR" target="_blank" rel="noopener">OneDrive, PDF</a></p><h2 id="注意">注意</h2><p><a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener"><img src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" alt="license-logo"></a></p><ul><li>所有公开的资料采用 <a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">知识共享署名-非商业性使用-禁止演绎 4.0</a> 国际许可协议进行许可</li><li>直到本文最后更新时，位于中国大陆的访问者可能需要一些特殊的姿势访问 OneDrive 分享链接</li><li>封面图出自番剧《佐贺偶像是传奇》</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> collection </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> presentation </tag>
+            
+            <tag> information </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>基于传统机器学习技术及 AST 分析技术的 Webshell Detector</title>
+      <link href="/2018/10/01/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"/>
+      <url>/2018/10/01/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/</url>
+      
+        <content type="html"><![CDATA[<figure><img src="/images/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/poison-shell-webshell-backdoor.jpg" alt><figcaption>poison-shell-webshell-backdoor</figcaption></figure><h2 id="总述">总述</h2><p><a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank" rel="noopener">AST, 抽象语法树</a> 上所包含的、可关联到代码特征的构成，可简单抽象分割为 - 结构特征 - 词频特征</p><p>将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：</p><ul><li>结构特征 <span class="math inline">\(\to\)</span> <a href="https://en.wikipedia.org/wiki/Support_vector_machine" target="_blank" rel="noopener">SVM, 支持向量机</a></li><li>词频特征 <span class="math inline">\(\to\)</span> <a href="https://en.wikipedia.org/wiki/Naive_Bayes_classifier" target="_blank" rel="noopener">naive Bayes classifiers, 朴素贝叶斯分类器</a></li></ul><p>一个非常有趣，或说是非常重要的任务，既是从 AST 上提取相应的特征，并构造出特征向量，以至直接导入相应分类器进行训练</p><h2 id="ast-结构特征的提取">AST 结构特征的提取</h2><p>因 AST 结构是树状的，我们需要对其进行 “拍平” 操作。 设有一颗 <span class="math inline">\(AST\)</span>，其全部 <span class="math inline">\(n\)</span> 个节点组成的集合为 <span class="math display">\[nodes(AST) = \{node_i | i \in [1,n] \cap \mathbb{N} \}\]</span> 设有节点 <span class="math inline">\(node_m,node_n\)</span>，节点 <span class="math inline">\(node_m\)</span> 的父节点为 <span class="math inline">\(node_n\)</span> 的关系表示为 <span class="math display">\[node_n \mathbb{P}_{AST} node_m\quad or\quad node_m \mathbb{C}_{AST} node_n\]</span> 设有节点 <span class="math inline">\(node_i\)</span>， 其子节点组成的集合可表示为 <span class="math display">\[children_{AST}(node_i) = \{ node_k | node_k \in nodes(AST) \land node_k\mathbb{C}_{AST}node_i \}\]</span> 则对于每一个节点 <span class="math inline">\(node_i\)</span>，都可以得到一个父子元组 <span class="math display">\[self\&amp;children_{AST}(node_i) = (node_i, node_{j1},..., node_{jn})\]</span> 其中 <span class="math display">\[node_{j1},...,node_{jn} \in children_{AST}(node_i) \land n = |children_{AST}(node_i)|\]</span> 故对于这颗 <span class="math inline">\(AST\)</span> 有 <span class="math display">\[self\&amp;children_{AST} = \{self\&amp;children_{AST}(node_i) | node_i \in nodes(AST)\}\]</span> 对于每一个节点 <span class="math inline">\(node_i\)</span>，都有一个整数值 <span class="math inline">\(kind\)</span> 可以指代这个节点的类型<span class="math inline">\(^1\)</span>，我们表示为 <span class="math display">\[kind(node_i)\]</span> 故对于每一个 <span class="math inline">\(self\&amp;children_{AST}(node_i)\)</span> 都可将其中所有 <span class="math inline">\(node_i\)</span> 替换为 <span class="math inline">\(kind(node_i)\)</span> 从而得到一整数集<span class="math inline">\(^2\)</span> <span class="math display">\[self\&amp;children_{AST}^{kind}(node_i) = (kind(node_1),...,kind(node_n))\]</span> 其中 <span class="math display">\[node_1,...,node_n = self\&amp;children_{AST}(node_i)[1],...,self\&amp;children_{AST}(node_i)[n]\]</span> 同样的，对于这颗 <span class="math inline">\(AST\)</span> 有 <span class="math display">\[self\&amp;children_{AST}^{kind} = \{self\&amp;children_{AST}^{kind}(node_i) | node_i \in nodes(AST)\}\]</span> 出于实践上的考量<span class="math inline">\(^3\)</span>，对于任意的 <span class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span>，都可取一哈希值作为此元组的代替标记，记为 <span class="math display">\[hash(self\&amp;children_{AST}^{kind}(node_i))\]</span> 则对于这颗 <span class="math inline">\(AST\)</span>，有对于每个 <span class="math inline">\(node_i\)</span> 所构成的元组的哈希值 <span class="math inline">\(hash(self\&amp;children_{AST}^{kind}(node_i))\)</span> 所构成的元组 <span class="math display">\[hash(AST) = (hash(self\&amp;children_{AST}^{kind}(node_1)),...,hash(self\&amp;children_{AST}^{kind}(node_n)))\]</span> 其中 <span class="math display">\[node_{1},...,node_{n} \in nodes(AST) \land n = |nodes(AST)|\]</span> 设元组 <span class="math inline">\(A\)</span> 中与 <span class="math inline">\(a\)</span> 值相同的元素的个数为 <span class="math inline">\(i\)</span>，记作 <span class="math display">\[count_A(a) = i\]</span> 构建这样一个元组 <span class="math inline">\(X\)</span>，使得 <span class="math display">\[X[hash(self\&amp;children_{AST}^{kind}(node_i))] = count_{hash(AST)}(hash(self\&amp;children_{AST}^{kind}(node_i)))\]</span> 则 <span class="math inline">\(X\)</span> 可作为这颗 <span class="math inline">\(AST\)</span> 的特征向量导入 SVM 分类器 设 webshell 样本代码的 <span class="math inline">\(AST\)</span> 组成的集合记为 <span class="math inline">\(\mathbb{W}\)</span>，则有 <span class="math display">\[isWebshell(AST_x) = \begin{cases}0&amp; AST_x \notin \mathbb{W}\\1&amp; AST_x \in \mathbb{W}\end{cases}\]</span> 即对于 <span class="math inline">\(n\)</span> 棵 <span class="math inline">\(AST_1,...AST_n\)</span>，有特征矩阵 <span class="math inline">\(Xs\)</span> 与期望向量 <span class="math inline">\(Y\)</span> <span class="math display">\[\left\{\begin{aligned}Xs &amp; = [ X_{AST_1},...,X_{AST_n} ] \\Ys &amp; = [ isWebshell(AST_1),...,isWebshell(AST_n) ]\end{aligned}\right.\]</span></p><h2 id="ast-词频特征的提取">AST 词频特征的提取</h2><p>在以纯文本的形式分析代码时，由于没有 <a href="https://en.wikipedia.org/wiki/Lexical_analysis#Tokenization" target="_blank" rel="noopener">Tokenizer, 分词器</a>，很难得到有较大意义的“词”，而在 <span class="math inline">\(AST\)</span> 层面可以依据 <span class="math inline">\(kind\)</span> 值得到有特征意义的“词”<span class="math inline">\(^4\)</span> 遍历整颗 <span class="math inline">\(AST\)</span>，可得到所有此类的 <span class="math inline">\(n\)</span> 个词组成的集合，即 <span class="math display">\[words(AST) = \{ word_1, word_2, ..., word_n \}\]</span> 很容易以此利用朴素贝叶斯分类得到预测模型</p><h2 id="附录">附录</h2><p><span class="math inline">\([1]\)</span> 例如，PHP 的 Zend 引擎生成的 AST 的结构<a href="https://github.com/php/php-src/blob/master/Zend/zend_ast.h#L165" target="_blank" rel="noopener">如下</a>： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">uint16_t</span> zend_ast_kind; <span class="comment">// L154</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">zend_ast_list</span> &#123;</span> <span class="comment">// L165</span></span><br><span class="line">zend_ast_kind kind;</span><br><span class="line">zend_ast_attr attr;</span><br><span class="line"><span class="keyword">uint32_t</span> lineno;</span><br><span class="line"><span class="keyword">uint32_t</span> children;</span><br><span class="line">zend_ast *child[<span class="number">1</span>];</span><br><span class="line">&#125; zend_ast_list;</span><br></pre></td></tr></table></figure></p><p>易看出其中的 <code>zend_ast_kind kind</code> 即为节点类型的标记值。</p><p><span class="math inline">\([2]\)</span> 一般在这一步进行对 <span class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span> 的“截短”，即使用一些方法降低不同的 <span class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span> 的个数，以使得得到的特征向量 <span class="math inline">\(X\)</span> 的维度数 <span class="math inline">\(|X|\)</span> 降低。</p><p><span class="math inline">\([3]\)</span> 例如，在大量的 PHP 代码样本（超过千万行）中得到的 AST 中，仅有不到 1 万个不同的 <span class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span> 的出现频率在 <span class="math inline">\(1/500000\)</span> 以上，故得到一个整数（甚至是 <code>16bit</code> 短整数）哈希值是可行的， 在实践中，通常采用从 0 开始递增地分配自然数值的简单哈希方法。</p><p><span class="math inline">\([4]\)</span> 对于一般的过程式脚本语言，在通俗的概念上，可以认为变量名、常量名、字面量、函数名，或包括面向对象的语言中的类名、接口名、成员名等，都可以称为有特征意义的“词”</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> projects </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> webshell </tag>
+            
+            <tag> webshell detector </tag>
+            
+            <tag> machine learning </tag>
+            
+            <tag> AST </tag>
+            
+            <tag> program analysis </tag>
+            
+            <tag> SVM </tag>
+            
+            <tag> naive bayes </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>C++ 如何把字符串字面量的内容映射到类型</title>
+      <link href="/2018/03/18/how-to-map-string-literal-to-type-in-cpp/"/>
+      <url>/2018/03/18/how-to-map-string-literal-to-type-in-cpp/</url>
+      
+        <content type="html"><![CDATA[<h2 id="注意">注意</h2><p><img src="/images/zhihu/zhihu.jpg" alt="zhihu"> 本文旨在整理知乎上的回答，原答案链接请<a href="https://www.zhihu.com/question/268188946/answer/334037634" target="_blank" rel="noopener">戳这里</a>。</p><h2 id="我觉得我可以写一个趣味小故事了">我觉得我可以写一个趣味小故事了</h2><p>在2013年，Richard Smith提了个提案，<a href="http://open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html" target="_blank" rel="noopener">n3599</a>。</p><p>如果这个提案进了标准，那么将完美地解决题主的问题。</p><p>可惜没有。</p><p>为什么呢，标准委员会以 <em>Revise with additional machinery for compile time string processing</em> 为由拒绝了这个提案。</p><p>但是很 happy 的是，gcc 和 clang 都支持了这项提案，当然 clang 要加一条编译选项 <code>-Wgnu-string-literal-operator-template</code></p><p>所以我先随意写一下 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> CharT, CharT... s&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> <span class="keyword">operator</span> <span class="string">""</span>_fuck() -&gt; <span class="built_in">std</span>::integer_sequence&lt;CharT, s...&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> STRLIT_TO_TYPE(strlit) strlit##_fuck</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static_assert</span>(</span><br><span class="line">        <span class="built_in">std</span>::is_same_v&lt;</span><br><span class="line">            <span class="keyword">decltype</span>(STRLIT_TO_TYPE(<span class="string">"abc"</span>)),</span><br><span class="line">            <span class="built_in">std</span>::integer_sequence&lt;<span class="keyword">char</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>&gt;</span><br><span class="line">        &gt;,</span><br><span class="line">        <span class="string">"Fuck"</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><h2 id="为什么这么好的feature不能想办法加入标准呢">为什么这么好的feature不能想办法加入标准呢？</h2><p>2016 年又有了解决这个问题的新提案，<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0424r0.pdf" target="_blank" rel="noopener">p0424r0</a>。</p><p>最新版本是 2017 年 11 月的 <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0424r0.pdf" target="_blank" rel="noopener">p0424r2</a>。</p><p>写出来的话大概是这个样子：</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;type_traits&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">const</span> <span class="keyword">auto</span>&amp; V&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ConstantReference</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span>&amp; value = V;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">auto</span>&amp; str&gt;</span><br><span class="line"><span class="keyword">constexpr</span> ConstantReference&lt;str&gt; <span class="keyword">operator</span><span class="string">""</span> _fuck()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Con, <span class="built_in">std</span>::<span class="keyword">size_t</span>... Indices&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="keyword">auto</span> <span class="title">Fuck</span><span class="params">(Con, <span class="built_in">std</span>::integer_sequence&lt;<span class="built_in">std</span>::<span class="keyword">size_t</span>, Indices...&gt;)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">std</span>::integer_sequence&lt;</span><br><span class="line">                <span class="built_in">std</span>::<span class="keyword">remove_cv_t</span>&lt;</span><br><span class="line">                    <span class="built_in">std</span>::<span class="keyword">remove_extent_t</span>&lt;</span><br><span class="line">                        <span class="built_in">std</span>::<span class="keyword">remove_reference_t</span>&lt;</span><br><span class="line">                            <span class="keyword">decltype</span>(Con::value)</span><br><span class="line">                        &gt;</span><br><span class="line">                    &gt;</span><br><span class="line">                &gt;, </span><br><span class="line">                Con::value[Indices]...</span><br><span class="line">            &gt;&#123;&#125;; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> STRLIT_TO_TYPE(strlit)      \</span></span><br><span class="line">    Fuck(                           \</span><br><span class="line">        strlit##_fuck,              \</span><br><span class="line">        <span class="built_in">std</span>::make_index_sequence&lt;   \</span><br><span class="line">            <span class="built_in">std</span>::extent_v&lt;          \</span><br><span class="line">                <span class="built_in">std</span>::<span class="keyword">remove_reference_t</span>&lt; \</span><br><span class="line">                    <span class="keyword">decltype</span>(strlit)\</span><br><span class="line">                &gt;                   \</span><br><span class="line">            &gt;                       \</span><br><span class="line">        &gt;&#123;&#125;                         \</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static_assert</span>(</span><br><span class="line">        <span class="built_in">std</span>::is_same_v&lt;</span><br><span class="line">            <span class="keyword">decltype</span>(STRLIT_TO_TYPE(<span class="string">"abc"</span>)),</span><br><span class="line">            <span class="built_in">std</span>::integer_sequence&lt;<span class="keyword">char</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>,<span class="number">0</span>&gt;</span><br><span class="line">        &gt;,</span><br><span class="line">        <span class="string">"Fuck"</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="section">18.3.5</h2><p>看到 <a href="https://github.com/boostorg/hana/blob/master/include/boost/hana/string.hpp#L86" target="_blank" rel="noopener">hana 的实现</a>了 真是令人耳目一新的奇技淫巧 hana 作者太强了</p><h2 id="section-1">18.3.18</h2><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0732r0.pdf" target="_blank" rel="noopener">P0732</a> 提出了一种更棒的方法，下面直接引用其中给出的例程</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> <span class="built_in">std</span> &#123;</span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> CharT, <span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">basic_fixed_string</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        <span class="function"><span class="keyword">constexpr</span> <span class="title">basic_fixed_string</span><span class="params">(<span class="keyword">const</span> CharT (&amp;foo)[N])</span></span></span><br><span class="line"><span class="function">        </span>&#123; <span class="built_in">std</span>::copy(foo, foo+N, m_data); &#125;</span><br><span class="line">        <span class="keyword">auto</span> <span class="keyword">operator</span>&lt;=&gt;(<span class="keyword">const</span> basic_fixed_string &amp;,</span><br><span class="line">                         <span class="keyword">const</span> basic_fixed_string &amp;) = <span class="keyword">default</span>;</span><br><span class="line">        CharT m_data[N];</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> CharT, <span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    basic_fixed_string(<span class="keyword">const</span> CharT (&amp;str)[N])-&gt;basic_fixed_string&lt;CharT, N<span class="number">-1</span>&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line">    <span class="keyword">using</span> fixed_string = basic_fixed_string&lt;<span class="keyword">char</span>, N&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="built_in">std</span>::<span class="keyword">size_t</span> N, <span class="built_in">std</span>::fixed_string&lt;N&gt; Str&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> hello_A = A&lt;<span class="number">5</span>, <span class="string">"hello"</span>&gt;;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> zhihu </tag>
+            
+            <tag> string literal </tag>
+            
+            <tag> type </tag>
+            
+            <tag> template </tag>
+            
+            <tag> meta programming </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>关于 C++ 顶层 const 和底层 const</title>
+      <link href="/2018/03/11/top-level-const-and-low-level-const-in-cpp/"/>
+      <url>/2018/03/11/top-level-const-and-low-level-const-in-cpp/</url>
+      
+        <content type="html"><![CDATA[<h2 id="注意">注意</h2><p><img src="/images/zhihu/zhihu.jpg" alt="zhihu.jpg"> 本文旨在整理知乎上的回答，原答案链接请<a href="https://www.zhihu.com/question/268569162/answer/339109206" target="_blank" rel="noopener">戳这里</a>。</p><h2 id="什么是-top-level-cv-qualifiers">什么是 top-level cv-qualifiers</h2><p><code>top-level cv-qualifiers</code> 是标准文档中的概念</p><blockquote><p>For a type <strong>cv T</strong>, the <strong>top-level cv-qualifiers</strong> of that type are those denoted by <strong>cv</strong>.</p></blockquote><h2 id="批判-c-primer">批判 c++ primer</h2><p>但是这个 <code>low-level const</code> 大概是 c++ primer 造出来的概念</p><p>我认为这个概念不仅容易让人混淆，而且根本没有存在的必要</p><p>我在网络上寻找到了疑似 c++ primer 中的一个段落</p><blockquote><p>As we’ve seen, a pointer is an object that can point to a different object. As a result, we can talk independently about whether a pointer is const and whether the objects to which it can point are const. We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p></blockquote><p>既然 point to a const object 就是 <code>low-level</code> 了，那么 point to a pointer that point to a const object 是什么呢？怕不是 <code>lower-than-low-level</code> 吧（误</p><h2 id="如何做">如何做</h2><p>那么如何对 c++ 类型系统中的 <code>cv-qualifiers</code> 做简单的理解呢？</p><p>我觉得只要理解语义就好了，完全没有必要深究 c++ 继承自 c 的拙劣的类型描述文法</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">using</span> Ptr = T *;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Ptr &lt;      <span class="keyword">int</span>&gt;  a [[maybe_unused]] = <span class="literal">nullptr</span>; <span class="comment">// top-level cv-qualifiers: &#123;const&#125;</span></span><br><span class="line">      Ptr &lt;<span class="keyword">const</span> <span class="keyword">int</span>&gt;  b [[maybe_unused]] = <span class="literal">nullptr</span>; <span class="comment">// top-level cv-qualifiers: (empty set)</span></span><br><span class="line"><span class="keyword">const</span> Ptr &lt;<span class="keyword">const</span> <span class="keyword">int</span>&gt;  c [[maybe_unused]] = <span class="literal">nullptr</span>; <span class="comment">// top-level cv-qualifiers: &#123;const&#125;</span></span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> zhihu </tag>
+            
+            <tag> standard </tag>
+            
+            <tag> const </tag>
+            
+            <tag> top-level </tag>
+            
+            <tag> low-level </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>基于解析器组合子的文法解析器的实现</title>
+      <link href="/2017/12/20/implementation-of-parser-based-on-parser-combinator/"/>
+      <url>/2017/12/20/implementation-of-parser-based-on-parser-combinator/</url>
+      
+        <content type="html"><![CDATA[<figure><img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt><figcaption>chtholly-in-comic</figcaption></figure><h2 id="背景"><em>背景</em></h2><p>　　<em>毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。</em></p><p>　　<em>1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。</em></p><p>　　<em>上下文无关文法拥有足够强的表达力来表示大多数程序设计语言的语法。实际上，几乎所有程序设计语言都是通过上下文无关文法来定义的。另一方面，上下文无关文法又足够简单，使得我们可以构造有效的分析算法来检验一个给定字串是否是由某个上下文无关文法产生的。</em></p><h2 id="理论基础">理论基础</h2><h3 id="ll分析器">LL分析器</h3><p>　　LL分析器是一种处理某些上下文无关文法的自顶向下分析器。它通常被称为是“递归下降”的，这与自底向上的LR分析器的特点“规约上升”相反。它从左到右处理输入，再对句型执行最左推导出语法树。</p><h3 id="组合子逻辑">组合子逻辑</h3><p>　　组合子逻辑是等价于lambda演算的计算模型，可以被看作是lambda演算的变体，它把lambda表达式（用来允许函数抽象）替代为组合子的有限集合，它们是不包含自由变量的原始函数。</p><h3 id="解析器组合子">解析器组合子</h3><p>　　解析器组合子是一个高阶函数，接受几个解析器作为输入，并返回一个新的解析器作为输出。在这种情况下，解析器是一个接受字符串作为输入并返回一些结构作为输出的函数，通常是一个解析树或一组表示解析成功停止的字符串中的位置。</p><p>　　解析器组合子实现了递归下降解析策略，有助于模块化分段构建和测试。这种解析技术被称为组合式解析。使用组合子构建的解析器可以直接构建，可读，模块化，结构良好，易于维护。它们已被广泛用于编译器和处理器的原型。</p><h2 id="目的">目的</h2><p>　　用 C++ 实现解析器组合子，并在解析器组合子的基础上实现解析器，即实现将符合某个文法的语言代码解析成抽象语法树。</p><h3 id="为什么用-c">为什么用 C++</h3><p>　　在C++11标准（ISO/IEC14882:2011）发布后，现代C++ 拥有了更强的表达能力，lambda表达式使得函数式写法及高阶函数的表达在C++中实现起来更为容易。C++在类型表达和元编程方面有着一定的优势。本次我选用 C++17标准（ISO/IEC14882:2017）实现解析器。</p><h3 id="选用什么文法">选用什么文法</h3><p>　　我以类BNF范式实现了一个简单的语言，在文法上语言更契合LISP的思想：没有语句，只有表达式。但语言并没有使用S表达式，而是使用数学表达式和c-style的风格构建基础表达式。</p><h3 id="怎么构建组合子">怎么构建组合子</h3><p>　　我尝试使用 C++ 中运算符重载的特性，以简单的语法快速地构建高阶函数，使得组合子在被使用的时候能够贴近于 BNF 表达式的书写习惯，比如克莱尼星号（*），存在一个或多个（+），推断为A或者B（A|B），推断为A B(A,B)，可选推断（~） 等等。</p><h2 id="总体设计">总体设计</h2><figure><img src="/images/implementation-of-parser-based-on-parser-combinator/design-show.png" alt><figcaption>design-show</figcaption></figure><h2 id="具体实现">具体实现</h2><figure><img src="/images/implementation-of-parser-based-on-parser-combinator/impl-show.png" alt><figcaption>impl-show</figcaption></figure><h3 id="basictree-泛型树"><code>BasicTree</code> 泛型树</h3><p>　　泛型树旨在构建一颗接受泛型元素的树状图结构。 其中每颗子树的子节点的数量是不被限制，且是动态确定的。且每颗子树都知道其父节点的信息，即可以在任意时刻轻易地回溯。</p><p>　　遍历或修改树中的元素以内置类 <code>Visitor</code> 或 <code>Modifier</code> 完成。</p><p>　　<code>Visitor</code> 表示了正在对某个节点进行访问，提供了访问父节点，上/下一个兄弟节点或者上/下一个子节点的方法。但 <code>Visitor</code> 不具备增加/删除节点的能力。</p><p>　　<code>Modifier</code> 是 <code>Visitor</code> 的一个子类（即其共有继承了<code>Visitor</code>），所以其拥有<code>Visitor</code>的全部功能，且<code>Modifier</code>提供了对树的结构的修改操作，包括增加/删除节点，交换节点或是移动节点。</p><h3 id="basicparseunit-泛型语法单元"><code>BasicParseUnit</code> 泛型语法单元</h3><p>　　泛型语法单元旨在表示一个终结符或非终结符，它携带了一个终结符或非终结符的全部信息。</p><h3 id="basicparsetree-泛型语法树"><code>BasicParseTree</code> 泛型语法树</h3><p>　　泛型语法树是泛型树对于泛型语法单元的特化。</p><h3 id="basicparsercombinator-泛型解析器组合子"><code>BasicParserCombinator</code> 泛型解析器组合子</h3><p>　　泛型解析器组合子用于生成解析器，其由一系列高阶函数作为静态方法，接受特定类型的函数，返回特定类型的函数，即解析器组合子进行的是对函数的处理，将一系列函数以不同的语义进行不同的组合操作，以实现文法的构建。</p><p>　　其内嵌类 <code>Process</code> 是对某个函数的封装，并增加了 <code>isOptional</code> 属性，每个 <code>Process</code> 都是对某个接受 <code>Info</code> 类型对象且返回 <code>Info</code> 类型对象的函数的封装。每个 <code>Info</code> 类型都携带目前被处理的代码的 View 信息和语法树上对于目前的某个节点的 <code>Modifier</code> 信息。</p><p>　　解析器组合子的大多数静态方法或是对操作符重载的友元函数都接受一或多个 <code>Process</code> 对象而后返回一个新的 <code>Process</code> 对象。这个新的 <code>Process</code>对象就是一条被结合出的新的文法产生式。</p><h3 id="basicparser-泛型解析器"><code>BasicParser</code> 泛型解析器</h3><p>　　泛型解析器是对泛型解析器组合子的应用。在语义上讲，其继承了泛型解析器组合子。需要注意的是解析器在实现上大量使用了C++17的 <code>inline variable</code>，以更清晰地写出文法规则。解析器使用组合子生成所有的产生式（文法规则），以体现组合子在实际应用和写法上的优势。</p><h2 id="关键问题及其解决方法">关键问题及其解决方法：</h2><h3 id="为什么使用泛型泛型是否是过度设计">为什么使用泛型，泛型是否是过度设计？</h3><p>　　使用泛型是为了根据被处理的语言代码的编码不同进行不同的处理，即选择不同的 <code>StringView</code> 进行处理。由于已经对于所有的泛型解析器/组合子特化了模板参数为 <code>std::string_view</code> 的类型，所以实际上没有增加使用难度，也没有对表层API进行任何更改。</p><h3 id="为什么混合处理词法解析和文法解析">为什么混合处理词法解析和文法解析？</h3><p>　　因为本身词法就可以看作文法的一部分，词法和文法区别表现在工程上，即表现在语法树的构建和（大部分语言中）空白字符的处理上。通过某些写法，我用组合子以同一范式写出了词法和文法的产生式，并处理了词法的贪心匹配需求。</p><h2 id="总结">总结：</h2><p>　　虽然解析器组合子对于递归下降的解析没有做出任何的复杂度改善和优化（即在自顶向下解析中，当解析模棱两可的上下文无关语法时，组合式分析需要指数级的时间和空间复杂度），但解析器组合子大幅度改善了硬编码的文法解析实现的写法，使得使用组合器构建的解析器有着易于构建，可读，模块化，结构合理，易于维护的特点。</p><p>　　本项目的解析器组合子并没有做到自动消除左递归，即在处理左递归产生式时，解析器永远不会被终止。但可以了解到的是，Frost和Hafiz在2006年描述了一种识别算法，该算法可以接受具有直接左递归规则的歧义语法，并且在2007年该算法被扩展为一个完整的分析算法，以适应间接以及多项式级时间复杂度的直接左递归，并用Haskell实现了该算法。同样的，早在1996年，Frost和Szydlowski就展示了解析器组合子如何使用记忆化来使时间复杂度减少到多项式级。</p><h2 id="附录">附录：</h2><ol type="1"><li>本项目的Git仓库（HTTPS方式）：<ul><li>https://github.com/PragmaTwice/ChthollyLang</li></ul></li><li>本项目使用Apache License 2.0：<ul><li>http://www.apache.org/licenses/LICENSE-2.0</li></ul></li><li>参见：<ul><li>https://en.wikipedia.org/wiki/Combinatory_logic</li><li>https://en.wikipedia.org/wiki/Context-free_grammar</li><li>https://en.wikipedia.org/wiki/Parsing_expression_grammar</li><li>https://en.wikipedia.org/wiki/LL_parser</li><li>https://en.wikipedia.org/wiki/Parser_combinator</li></ul></li><li>封面图系番剧《末日时在做什么？有没有空？可以来拯救吗？》，作者不详</li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> projects </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> parser </tag>
+            
+            <tag> parser combinator </tag>
+            
+            <tag> implementation </tag>
+            
+            <tag> chtholly </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>C++ 自己写一个更好的 string 需要什么步骤</title>
+      <link href="/2017/09/12/how-to-write-a-better-string-in-cpp/"/>
+      <url>/2017/09/12/how-to-write-a-better-string-in-cpp/</url>
+      
+        <content type="html"><![CDATA[<h2 id="注意">注意</h2><p><img src="/images/zhihu/zhihu.jpg" alt="zhihu"> 本文旨在整理知乎上的回答，原答案链接请<a href="https://www.zhihu.com/question/64949799/answer/228337291" target="_blank" rel="noopener">戳这里</a>。</p><h2 id="对-stdbasic_string-的理解">对 std::basic_string 的理解</h2><p><code>std::string</code> 的设计思想和 STL 以及整个 Std Librarys 是一致的，不以运行效率为代价做任何易用性上的改变，对于一些非常复杂或者没有统一方案的东西宁可不加入，保持整体上的洁净。</p><p><a href="https://en.cppreference.com/w/" target="_blank" rel="noopener">CppRef</a> 上这样描述 <code>std::basic_string</code> :</p><blockquote><p>The class is dependent neither on the character type nor on the nature of operations on that type.</p></blockquote><p>但是这样的结果是大家都以其他语言的 string 去喷 <code>std::string</code>，就是因为都起了相同的名字——叫 string。</p><h2 id="安利-text_view">安利 text_view</h2><p>那么大家心目中的 string 在 c++ 里是怎么样的呢 ， <a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0244r2.html" target="_blank" rel="noopener"><code>text_view</code></a> 提案里这样说的：</p><blockquote><p>C++11 added support for new character types [N2249] and Unicode string literals [N2442], but neither C++11, nor more recent standards have provided means of efficiently and conveniently enumerating code points in Unicode or legacy encodings. While it is possible to implement such enumeration using interfaces provided in the standard <locale> and <codecvt> libraries, doing so is awkward, requires that text be provided as pointers to contiguous memory, and inefficent due to virtual function call overhead.</codecvt></locale></p></blockquote><p><code>text_view</code> 是怎么样的呢：</p><blockquote><p>(text_view) provides iterator and range based interfaces for encoding and decoding strings in a variety of character encodings. The interface is intended to support all modern and legacy character encodings, though implementations are expected to only provide support for a limited set of encodings.</p></blockquote><blockquote><p>(text_view) intended to solve the above (shortage in processing strings with <codecvt>) issues while also providing a modern interface that is intuitive to use and can be used with other standard provided facilities; in particular, the C++ standard <algorithm> library.</algorithm></codecvt></p></blockquote><p>那么要在C++中写一个“更好的“的 string ，应该就是写一个切合大家心中对 string 的所有易用性上的幻想的 string，大概可以参考 <a href="https://github.com/tahonermann/text_view" target="_blank" rel="noopener"><code>text_view</code> 提案附带的实现</a>，以及 <a href="http://doc.qt.io/qt-5/qstring.html" target="_blank" rel="noopener">Qt / <code>QString</code></a> , 既然要易用，配套个正则也是加分项吧（</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> daily </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> c++ </tag>
+            
+            <tag> zhihu </tag>
+            
+            <tag> string </tag>
+            
+            <tag> STL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
