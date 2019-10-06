@@ -6,19 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为 - 结构特征 - 词频特征 将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，">
+    <meta name="description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为  结构特征 词频特征  将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，或说">
 <meta name="keywords" content="webshell,webshell detector,machine learning,AST,program analysis,SVM,naive bayes">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于传统机器学习技术及 AST 分析技术的 Webshell Detector">
 <meta property="og:url" content="https://pragmatwice.github.io/2018/10/01/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
-<meta property="og:description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为 - 结构特征 - 词频特征 将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，">
+<meta property="og:description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为  结构特征 词频特征  将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，或说">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://pragmatwice.github.io/images/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/poison-shell-webshell-backdoor.jpg">
-<meta property="og:updated_time" content="2019-10-06T05:15:03.196Z">
+<meta property="og:updated_time" content="2019-10-06T06:16:50.800Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于传统机器学习技术及 AST 分析技术的 Webshell Detector">
-<meta name="twitter:description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为 - 结构特征 - 词频特征 将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，">
+<meta name="twitter:description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为  结构特征 词频特征  将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，或说">
 <meta name="twitter:image" content="https://pragmatwice.github.io/images/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/poison-shell-webshell-backdoor.jpg">
     
     
@@ -160,7 +160,11 @@
 <img src="/images/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/poison-shell-webshell-backdoor.jpg" alt><figcaption>poison-shell-webshell-backdoor</figcaption>
 </figure>
 <h2 id="总述">总述</h2>
-<p><a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank" rel="noopener">AST, 抽象语法树</a> 上所包含的、可关联到代码特征的构成，可简单抽象分割为 - 结构特征 - 词频特征</p>
+<p><a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank" rel="noopener">AST, 抽象语法树</a> 上所包含的、可关联到代码特征的构成，可简单抽象分割为</p>
+<ul>
+<li>结构特征</li>
+<li>词频特征</li>
+</ul>
 <p>将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：</p>
 <ul>
 <li>结构特征 <span class="math inline">\(\to\)</span> <a href="https://en.wikipedia.org/wiki/Support_vector_machine" target="_blank" rel="noopener">SVM, 支持向量机</a></li>
