@@ -22,6 +22,10 @@
             
             <tag> c++ </tag>
             
+            <tag> AST </tag>
+            
+            <tag> program analysis </tag>
+            
             <tag> clang </tag>
             
             <tag> llvm </tag>
@@ -55,7 +59,11 @@
             
             <tag> c++ </tag>
             
+            <tag> c++ standard </tag>
+            
             <tag> reflection </tag>
+            
+            <tag> c++ template </tag>
             
             <tag> zhihu </tag>
             
@@ -84,6 +92,8 @@
             
             <tag> c++ </tag>
             
+            <tag> c++ standard </tag>
+            
         </tags>
       
     </entry>
@@ -107,9 +117,19 @@
       
         <tags>
             
+            <tag> c++ template </tag>
+            
+            <tag> STL </tag>
+            
             <tag> presentation </tag>
             
             <tag> information </tag>
+            
+            <tag> haskell </tag>
+            
+            <tag> functional programming </tag>
+            
+            <tag> os kernel </tag>
             
         </tags>
       
@@ -173,13 +193,15 @@
             
             <tag> c++ </tag>
             
+            <tag> c++ standard </tag>
+            
+            <tag> c++ template </tag>
+            
             <tag> zhihu </tag>
             
             <tag> string literal </tag>
             
             <tag> type </tag>
-            
-            <tag> template </tag>
             
             <tag> meta programming </tag>
             
@@ -208,9 +230,9 @@
             
             <tag> c++ </tag>
             
-            <tag> zhihu </tag>
+            <tag> c++ standard </tag>
             
-            <tag> standard </tag>
+            <tag> zhihu </tag>
             
             <tag> const </tag>
             
