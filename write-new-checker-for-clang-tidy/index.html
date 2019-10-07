@@ -10,12 +10,12 @@
 <meta name="keywords" content="c++,AST,program analysis,clang,llvm,clang-tidy,checker">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何给 clang-tidy 写新 checker">
-<meta property="og:url" content="https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/index.html">
+<meta property="og:url" content="https://imtwice.cn/write-new-checker-for-clang-tidy/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
 <meta property="og:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.cn/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png">
-<meta property="og:updated_time" content="2019-10-06T14:27:30.126Z">
+<meta property="og:updated_time" content="2019-10-07T03:47:35.596Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何给 clang-tidy 写新 checker">
 <meta name="twitter:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 chec">
@@ -78,7 +78,7 @@
       <ul>
         
         
-        <li><a class="icon" href="/2019/06/28/does-cpp-need-reflection/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" href="/does-cpp-need-reflection/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -91,16 +91,16 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.cn/write-new-checker-for-clang-tidy/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -249,16 +249,16 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/2019/10/05/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.cn/write-new-checker-for-clang-tidy/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

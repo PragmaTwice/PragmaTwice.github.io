@@ -10,14 +10,14 @@
 <meta name="keywords" content="c++,parser,parser combinator,implementation,chtholly">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于解析器组合子的文法解析器的实现">
-<meta property="og:url" content="https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/index.html">
+<meta property="og:url" content="https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
 <meta property="og:description" content="chtholly-in-comic  背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.cn/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg">
 <meta property="og:image" content="https://imtwice.cn/images/implementation-of-parser-based-on-parser-combinator/design-show.png">
 <meta property="og:image" content="https://imtwice.cn/images/implementation-of-parser-based-on-parser-combinator/impl-show.png">
-<meta property="og:updated_time" content="2019-10-06T14:27:30.126Z">
+<meta property="og:updated_time" content="2019-10-07T03:47:35.596Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于解析器组合子的文法解析器的实现">
 <meta name="twitter:description" content="chtholly-in-comic  背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示">
@@ -79,10 +79,10 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" href="/2018/03/11/top-level-const-and-low-level-const-in-cpp/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" href="/top-level-const-and-low-level-const-in-cpp/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" href="/2017/09/12/how-to-write-a-better-string-in-cpp/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" href="/how-to-write-a-better-string-in-cpp/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -95,16 +95,16 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&text=基于解析器组合子的文法解析器的实现"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&is_video=false&description=基于解析器组合子的文法解析器的实现"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=基于解析器组合子的文法解析器的实现&body=Check out this article: https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&name=基于解析器组合子的文法解析器的实现&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&text=基于解析器组合子的文法解析器的实现"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&is_video=false&description=基于解析器组合子的文法解析器的实现"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于解析器组合子的文法解析器的实现&body=Check out this article: https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&name=基于解析器组合子的文法解析器的实现&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -270,16 +270,16 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&text=基于解析器组合子的文法解析器的实现"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&is_video=false&description=基于解析器组合子的文法解析器的实现"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=基于解析器组合子的文法解析器的实现&body=Check out this article: https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/2017/12/20/implementation-of-parser-based-on-parser-combinator/&name=基于解析器组合子的文法解析器的实现&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&text=基于解析器组合子的文法解析器的实现"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&is_video=false&description=基于解析器组合子的文法解析器的实现"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于解析器组合子的文法解析器的实现&body=Check out this article: https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&title=基于解析器组合子的文法解析器的实现"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/implementation-of-parser-based-on-parser-combinator/&name=基于解析器组合子的文法解析器的实现&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
