@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image8.png">
 <meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image9.png">
 <meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image10.png">
-<meta property="og:updated_time" content="2019-10-26T09:59:42.178Z">
+<meta property="og:updated_time" content="2019-10-26T16:46:41.152Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对方舟编译器的简单调查">
 <meta name="twitter:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
@@ -237,7 +237,13 @@
 <h2 id="展望">4.展望</h2>
 <p>虽然国际上有许多成熟、优秀的编译器项目（如 LLVM等），以及一些正在开发的IR（如 MLIR等），并且这些项目都有国人参与，但方舟编译器确实代表了国内公司的研发水平。</p>
 <p>在接下来的开源计划中，方舟编译器把前端、后端、编译优化，完整支持Java程序编译、JavaScript语言应用的编译提上了日程。在实现这些开源计划后，方舟编译器才会走出孵化期，成为一个正常意义上的、健壮的开源项目。 [16]</p>
-<p>在项目的README中，开发者总结了四个技术特点，指出方舟编译器能够将不同语言代码编译成一套可执行文件，在运行环境中高效执行： [16] - 支持多语言联合优化、消除跨语言调用开销； - 更轻量的语言运行时； - 软硬协同充分发挥硬件能效； - 支持多样化的终端设备平台。</p>
+<p>在项目的README中，开发者总结了四个技术特点，指出方舟编译器能够将不同语言代码编译成一套可执行文件，在运行环境中高效执行： [16]</p>
+<ul>
+<li>支持多语言联合优化、消除跨语言调用开销；</li>
+<li>更轻量的语言运行时；</li>
+<li>软硬协同充分发挥硬件能效；</li>
+<li>支持多样化的终端设备平台。</li>
+</ul>
 <p>当然，这都是在完成孵化期后才能看到的效果。</p>
 <h2 id="对比">5.对比</h2>
 <h3 id="llvm">5.1.LLVM</h3>
