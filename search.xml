@@ -38,7 +38,7 @@
       
       <categories>
           
-          <category> projects </category>
+          <category> reports </category>
           
       </categories>
       
@@ -48,8 +48,6 @@
             <tag> huawei </tag>
             
             <tag> compiler </tag>
-            
-            <tag> report </tag>
             
         </tags>
       
