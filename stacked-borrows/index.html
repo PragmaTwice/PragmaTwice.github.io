@@ -10,19 +10,19 @@
 <meta name="keywords" content="rust,paper,aliasing model,dynamic analysis,formal verification">
 <meta property="og:type" content="article">
 <meta property="og:title" content="论文赏析 &quot;Stacked Borrows: An Aliasing Model for Rust&quot;">
-<meta property="og:url" content="https://imtwice.cn/stacked-borrows/index.html">
+<meta property="og:url" content="https://imtwice.com/stacked-borrows/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
 <meta property="og:description" content="这次我们介绍一篇发表在 POPL2020 上的文章《Stacked Borrows: An Aliasing Model for Rust》，其一作 Ralf Jung 目前是 MPI 软件系统研究所的博士后研究员，曾经做出过一些程序理解、验证及证明相关的成果，并曾工作于 Mozilla 的 Rust 程序语言组。 Rust 是一门年轻的系统级编程语言，也是 Mozilla 所期望的 C/C++">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="https://imtwice.cn/images/stacked-borrows/1.png">
-<meta property="og:image" content="https://imtwice.cn/images/stacked-borrows/3.png">
-<meta property="og:image" content="https://imtwice.cn/images/stacked-borrows/4.png">
-<meta property="og:image" content="https://imtwice.cn/images/stacked-borrows/5.png">
-<meta property="og:updated_time" content="2021-10-09T08:18:13.781Z">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/1.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/3.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/4.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/5.png">
+<meta property="og:updated_time" content="2021-10-09T15:14:12.007Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="论文赏析 &quot;Stacked Borrows: An Aliasing Model for Rust&quot;">
 <meta name="twitter:description" content="这次我们介绍一篇发表在 POPL2020 上的文章《Stacked Borrows: An Aliasing Model for Rust》，其一作 Ralf Jung 目前是 MPI 软件系统研究所的博士后研究员，曾经做出过一些程序理解、验证及证明相关的成果，并曾工作于 Mozilla 的 Rust 程序语言组。 Rust 是一门年轻的系统级编程语言，也是 Mozilla 所期望的 C/C++">
-<meta name="twitter:image" content="https://imtwice.cn/images/stacked-borrows/1.png">
+<meta name="twitter:image" content="https://imtwice.com/images/stacked-borrows/1.png">
     
     
         
@@ -96,16 +96,16 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/stacked-borrows/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.cn/stacked-borrows/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/stacked-borrows/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.com/stacked-borrows/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -222,16 +222,16 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/stacked-borrows/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.cn/stacked-borrows/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/stacked-borrows/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.com/stacked-borrows/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

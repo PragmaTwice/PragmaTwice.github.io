@@ -10,24 +10,24 @@
 <meta name="keywords" content="huawei,compiler">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对方舟编译器的简单调查">
-<meta property="og:url" content="https://imtwice.cn/report-on-ark-compiler/index.html">
+<meta property="og:url" content="https://imtwice.com/report-on-ark-compiler/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
 <meta property="og:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image1.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image2.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image4.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image5.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image6.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image7.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image8.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image9.png">
-<meta property="og:image" content="https://imtwice.cn/images/report-on-ark-compiler/image10.png">
-<meta property="og:updated_time" content="2021-10-09T08:18:13.781Z">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image2.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image4.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image5.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image6.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image7.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image8.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image9.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image10.png">
+<meta property="og:updated_time" content="2021-10-09T15:14:12.007Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对方舟编译器的简单调查">
 <meta name="twitter:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
-<meta name="twitter:image" content="https://imtwice.cn/images/report-on-ark-compiler/image1.png">
+<meta name="twitter:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
     
     
         
@@ -101,16 +101,16 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/report-on-ark-compiler/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.cn/report-on-ark-compiler/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-ark-compiler/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.com/report-on-ark-compiler/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -345,16 +345,16 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.cn/report-on-ark-compiler/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.cn/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.cn/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.cn/report-on-ark-compiler/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.cn/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.cn/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-ark-compiler/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://imtwice.com/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.com/report-on-ark-compiler/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
