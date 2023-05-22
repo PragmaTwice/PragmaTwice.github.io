@@ -45,8 +45,6 @@
       
         <tags>
             
-            <tag> formal verification </tag>
-            
             <tag> rust </tag>
             
             <tag> paper </tag>
@@ -54,6 +52,8 @@
             <tag> aliasing model </tag>
             
             <tag> dynamic analysis </tag>
+            
+            <tag> formal verification </tag>
             
         </tags>
       
@@ -78,13 +78,13 @@
       
         <tags>
             
+            <tag> formal verification </tag>
+            
             <tag> frama-c </tag>
             
             <tag> seahorn </tag>
             
             <tag> static analysis </tag>
-            
-            <tag> formal verification </tag>
             
         </tags>
       
