@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/design-show.png">
 <meta property="og:image" content="https://imtwice.com/images/implementation-of-parser-based-on-parser-combinator/impl-show.png">
-<meta property="og:updated_time" content="2022-06-18T15:55:47.270Z">
+<meta property="og:updated_time" content="2023-05-22T09:29:33.942Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于解析器组合子的文法解析器的实现">
 <meta name="twitter:description" content="chtholly-in-comic  背景 　　毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。 　　1956年，诺姆·乔姆斯基提出了乔姆斯基谱系，较好地以形式文法表达能力作为因素分出了四个文法层级。其中的上下文无关文法（2-型文法）生成上下文无关语言，为大多数程序设计语言的语法提供了理论基础。 　　上下文无关文法拥有足够强的表达力来表示">
@@ -159,7 +159,7 @@
 
   <div class="content" itemprop="articleBody">
     <figure>
-<img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt><figcaption>chtholly-in-comic</figcaption>
+<img src="/images/implementation-of-parser-based-on-parser-combinator/chtholly-in-comic.jpg" alt="chtholly-in-comic"><figcaption>chtholly-in-comic</figcaption>
 </figure>
 <h2 id="背景"><em>背景</em></h2>
 <p>　　<em>毫无疑问，形式语言理论在工程实践上取得了巨大的成功。形式文法作为描述形式语言的方法指出了形式语言的确定性。</em></p>
@@ -183,11 +183,11 @@
 <p>　　我尝试使用 C++ 中运算符重载的特性，以简单的语法快速地构建高阶函数，使得组合子在被使用的时候能够贴近于 BNF 表达式的书写习惯，比如克莱尼星号（*），存在一个或多个（+），推断为A或者B（A|B），推断为A B(A,B)，可选推断（~） 等等。</p>
 <h2 id="总体设计">总体设计</h2>
 <figure>
-<img src="/images/implementation-of-parser-based-on-parser-combinator/design-show.png" alt><figcaption>design-show</figcaption>
+<img src="/images/implementation-of-parser-based-on-parser-combinator/design-show.png" alt="design-show"><figcaption>design-show</figcaption>
 </figure>
 <h2 id="具体实现">具体实现</h2>
 <figure>
-<img src="/images/implementation-of-parser-based-on-parser-combinator/impl-show.png" alt><figcaption>impl-show</figcaption>
+<img src="/images/implementation-of-parser-based-on-parser-combinator/impl-show.png" alt="impl-show"><figcaption>impl-show</figcaption>
 </figure>
 <h3 id="basictree-泛型树"><code>BasicTree</code> 泛型树</h3>
 <p>　　泛型树旨在构建一颗接受泛型元素的树状图结构。 其中每颗子树的子节点的数量是不被限制，且是动态确定的。且每颗子树都知道其父节点的信息，即可以在任意时刻轻易地回溯。</p>
@@ -297,7 +297,7 @@
         
         <footer id="footer">
   <div class="footer-left">
-    Copyright &copy; 2022 Pragma Twice
+    Copyright &copy; 2023 Pragma Twice
   </div>
   <div class="footer-right">
     <nav>

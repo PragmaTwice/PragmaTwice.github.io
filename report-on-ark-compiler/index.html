@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
+    <meta name="description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&amp;quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&amp;quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨">
 <meta name="keywords" content="huawei,compiler">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对方舟编译器的简单调查">
 <meta property="og:url" content="https://imtwice.com/report-on-ark-compiler/index.html">
 <meta property="og:site_name" content="I&#39;m Twice">
-<meta property="og:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
+<meta property="og:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&amp;quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&amp;quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
 <meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image2.png">
@@ -23,10 +23,10 @@
 <meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image8.png">
 <meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image9.png">
 <meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image10.png">
-<meta property="og:updated_time" content="2022-06-18T15:55:47.270Z">
+<meta property="og:updated_time" content="2023-05-22T09:29:33.942Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对方舟编译器的简单调查">
-<meta name="twitter:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
+<meta name="twitter:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&amp;quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&amp;quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨">
 <meta name="twitter:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
     
     
@@ -167,7 +167,7 @@
     <h2 id="摘要">1.摘要</h2>
 <h3 id="背景">1.1.背景</h3>
 <p>2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。</p>
-<p>在方舟编译器主页上，其被描述为"是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件" [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。</p>
+<p>在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。</p>
 <h3 id="主旨">1.2.主旨</h3>
 <p>本报告旨在搜集相关资讯、材料，整理相关内容，以对方舟编译器未来发展和其周边的可以做出进一步研究的方向进行合理推测和展望。从而可以给今后的科研选题做指导，并为下一步的调查做铺垫。</p>
 <h2 id="架构">2.架构</h2>
@@ -287,26 +287,26 @@
 <p>从Whirl IR，到Maple IR和MLIR，分层次IR比起传统的单层或是底层IR有着许多优势，而如何更好的设计分层次IR成为了一个引人注目的问题。系统地研究分层次IR可能会得到更好的结果以推动工业级IR的设计。</p>
 <h2 id="附录">7.附录</h2>
 <h3 id="引用">7.1.引用</h3>
-<p>[1] CNMO, "华为正式宣布 方舟编译器将于8月31日正式开源," 2019. [联机]. Available: https://tech.sina.com.cn/mobile/n/n/2019-08-30/doc-iicezzrq2140953.shtml.</p>
-<p>[2] 华为, "方舟编译器 官方网站," 华为, 2019. [联机]. Available: https://www.openarkcompiler.cn/.</p>
-<p>[3] 华为, "方舟编译器 架构设计," 2019. [联机]. Available: https://www.openarkcompiler.cn/document/frameworkDesgin.</p>
-<p>[4] 华为, "方舟编译器 开源代码 官方主仓库," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler.</p>
-<p>[5] 华为, "方舟编译器 Phase 设计介绍," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Compiler_Phase_Description.md.</p>
-<p>[6] LLVM, "Writing an LLVM Pass - LLVM 10 documentation," [联机]. Available: http://llvm.org/docs/WritingAnLLVMPass.html.</p>
-<p>[7] 华为, "方舟编译器 开源代码 src/maple_ipa/include/module_phases.def," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_ipa/include/module_phases.def.</p>
-<p>[8] 华为, "方舟编译器 开源代码 src/maple_me/include/me_phases.def," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_me/include/me_phases.def.</p>
-<p>[9] 华为, "Maple IR Design Document," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/MapleIRDesign.md.</p>
-<p>[10] Open64, "Open64 Compiler Whirl Intermediate Representation," 3 8 2007. [联机]. Available: https://www.mcs.anl.gov/OpenAD/open64A.pdf.</p>
-<p>[11] RednaxelaFX, "垃圾回收机制中，引用计数法是如何维护所有对象引用的？," [联机]. Available: https://www.zhihu.com/question/21539353/answer/18596488.</p>
-<p>[12] 华为, "朴素版 RC 操作插入原理," 2018. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Naive_RC_Insertion_Description.md.</p>
-<p>[13] 华为, "方舟编译器 官方网站 FAQ," 2019. [联机]. Available: https://www.openarkcompiler.cn/document/FAQ.</p>
-<p>[14] bsdelf, "程序员们如何看待华为方舟编译器首次开源部分代码？," 2019. [联机]. Available: https://www.zhihu.com/question/343494051/answer/809494133.</p>
-<p>[15] 源伞科技, "华为方舟的爱之体检," 2019. [联机]. Available: https://www.sourcebrella.com/blog/huawei-ark-compiler-test/.</p>
-<p>[16] 华为, "方舟编译器 开源代码 Readme.md," 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/Readme.md.</p>
-<p>[17] V. Bridgers, "LLVM IR Tutorial - Phis, geps and other things, oh my!," [联机]. Available: http://llvm.org/devmtg/2019-04/slides/Tutorial-Bridgers-LLVM_IR_tutorial.pdf.</p>
-<p>[18] MobiVM, "MobiDevelop's RoboVM Fork," [联机]. Available: http://robovm.mobidevelop.com/.</p>
-<p>[19] Google, "Multi-Level Intermediate Representation - GitHub Repo," 2019. [联机]. Available: https://github.com/tensorflow/mlir.</p>
-<p>[20] T. Shpeisman 和 C. Lattner, "MLIR: Multi-Level Intermediate Representation for Compiler Infrastructure," 2019. [联机]. Available: https://ai.google/research/pubs/pub48035.pdf.</p>
+<p>[1] CNMO, &quot;华为正式宣布 方舟编译器将于8月31日正式开源,&quot; 2019. [联机]. Available: https://tech.sina.com.cn/mobile/n/n/2019-08-30/doc-iicezzrq2140953.shtml.</p>
+<p>[2] 华为, &quot;方舟编译器 官方网站,&quot; 华为, 2019. [联机]. Available: https://www.openarkcompiler.cn/.</p>
+<p>[3] 华为, &quot;方舟编译器 架构设计,&quot; 2019. [联机]. Available: https://www.openarkcompiler.cn/document/frameworkDesgin.</p>
+<p>[4] 华为, &quot;方舟编译器 开源代码 官方主仓库,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler.</p>
+<p>[5] 华为, &quot;方舟编译器 Phase 设计介绍,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Compiler_Phase_Description.md.</p>
+<p>[6] LLVM, &quot;Writing an LLVM Pass - LLVM 10 documentation,&quot; [联机]. Available: http://llvm.org/docs/WritingAnLLVMPass.html.</p>
+<p>[7] 华为, &quot;方舟编译器 开源代码 src/maple_ipa/include/module_phases.def,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_ipa/include/module_phases.def.</p>
+<p>[8] 华为, &quot;方舟编译器 开源代码 src/maple_me/include/me_phases.def,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_me/include/me_phases.def.</p>
+<p>[9] 华为, &quot;Maple IR Design Document,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/MapleIRDesign.md.</p>
+<p>[10] Open64, &quot;Open64 Compiler Whirl Intermediate Representation,&quot; 3 8 2007. [联机]. Available: https://www.mcs.anl.gov/OpenAD/open64A.pdf.</p>
+<p>[11] RednaxelaFX, &quot;垃圾回收机制中，引用计数法是如何维护所有对象引用的？,&quot; [联机]. Available: https://www.zhihu.com/question/21539353/answer/18596488.</p>
+<p>[12] 华为, &quot;朴素版 RC 操作插入原理,&quot; 2018. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Naive_RC_Insertion_Description.md.</p>
+<p>[13] 华为, &quot;方舟编译器 官方网站 FAQ,&quot; 2019. [联机]. Available: https://www.openarkcompiler.cn/document/FAQ.</p>
+<p>[14] bsdelf, &quot;程序员们如何看待华为方舟编译器首次开源部分代码？,&quot; 2019. [联机]. Available: https://www.zhihu.com/question/343494051/answer/809494133.</p>
+<p>[15] 源伞科技, &quot;华为方舟的爱之体检,&quot; 2019. [联机]. Available: https://www.sourcebrella.com/blog/huawei-ark-compiler-test/.</p>
+<p>[16] 华为, &quot;方舟编译器 开源代码 Readme.md,&quot; 2019. [联机]. Available: https://gitee.com/harmonyos/OpenArkCompiler/blob/master/Readme.md.</p>
+<p>[17] V. Bridgers, &quot;LLVM IR Tutorial - Phis, geps and other things, oh my!,&quot; [联机]. Available: http://llvm.org/devmtg/2019-04/slides/Tutorial-Bridgers-LLVM_IR_tutorial.pdf.</p>
+<p>[18] MobiVM, &quot;MobiDevelop's RoboVM Fork,&quot; [联机]. Available: http://robovm.mobidevelop.com/.</p>
+<p>[19] Google, &quot;Multi-Level Intermediate Representation - GitHub Repo,&quot; 2019. [联机]. Available: https://github.com/tensorflow/mlir.</p>
+<p>[20] T. Shpeisman 和 C. Lattner, &quot;MLIR: Multi-Level Intermediate Representation for Compiler Infrastructure,&quot; 2019. [联机]. Available: https://ai.google/research/pubs/pub48035.pdf.</p>
 
   </div>
 </article>
@@ -372,7 +372,7 @@
         
         <footer id="footer">
   <div class="footer-left">
-    Copyright &copy; 2022 Pragma Twice
+    Copyright &copy; 2023 Pragma Twice
   </div>
   <div class="footer-right">
     <nav>

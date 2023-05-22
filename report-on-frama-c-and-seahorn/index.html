@@ -7,7 +7,7 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="背景 形式化验证 形式化验证旨在用数学方法对系统建模以证明其正确性，特别是用以验证软件或硬件系统。其在真实的系统上构建对应的抽象数学模型，进而对抽象模型提供形式化证明以证明真实系统的正确性。对于针对软件的形式化验证，常用的技术包括模型检查、抽象解释及演绎验证等。 模型检查将程序视为状态机，用初始状态及状态转移函数描述系统，通过遍历程序的状态以验证程序的所有可能的状态都满足给定的性质。 一种常用的模">
-<meta name="keywords" content="formal verification,frama-c,seahorn,static analysis">
+<meta name="keywords" content="frama-c,seahorn,static analysis,formal verification">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Frama-C 及 SeaHorn 调查报告">
 <meta property="og:url" content="https://imtwice.com/report-on-frama-c-and-seahorn/index.html">
@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image5.png">
 <meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image6.png">
 <meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image7.png">
-<meta property="og:updated_time" content="2022-06-18T15:55:47.270Z">
+<meta property="og:updated_time" content="2023-05-22T09:29:33.942Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Frama-C 及 SeaHorn 调查报告">
 <meta name="twitter:description" content="背景 形式化验证 形式化验证旨在用数学方法对系统建模以证明其正确性，特别是用以验证软件或硬件系统。其在真实的系统上构建对应的抽象数学模型，进而对抽象模型提供形式化证明以证明真实系统的正确性。对于针对软件的形式化验证，常用的技术包括模型检查、抽象解释及演绎验证等。 模型检查将程序视为状态机，用初始状态及状态转移函数描述系统，通过遍历程序的状态以验证程序的所有可能的状态都满足给定的性质。 一种常用的模">
@@ -183,7 +183,7 @@
 <p>Frama-C 的分析及验证算法完全实现在各个插件上，主要的插件如表1.1。这些插件实现了广泛的程序分析技术，并建立起插件间的基于约束的依赖关系。其中不仅包括上文中提到的分析技术，还包含了依赖分析（Dependency Analysis）、程序切片（Program Slicing）等。</p>
 <p>ACSL（ANSI/ISO C Specification Language） [3]是C语言的规范语言，实现了对于C语言的约束编程（Constraint Programming）。其可以用类似霍尔逻辑的方式指定C语言代码如函数、循环等的特性及约束，并以嵌入注释块的方式避免扩展C语法带来的兼容性问题。</p>
 <p>对于函数，ACSL能够指出其在初始时满足什么条件（requires），在执行结束后满足什么约束（ensures），以及在执行过程中改动了哪些内存区域（assigns）等，如图1.2中swap函数的ACSL指出其需要在函数被执行前指针 a, b 合法且所指向的内存区域不重叠、保证在函数被执行后 *a 值与 *b 值被交换、且函数仅改动了内存中 *a, *b 的值。</p>
-<p>对于循环，ACSL能够指出循环不变量（loop invariant）、循环所改动的内存区域（loop assigns）等，如图1.3中指出了两个循环不变量（<span class="math inline">\(i \in \left\lbrack 0,10 \right\rbrack\)</span> 和 <span class="math inline">\(\forall j \in \mathbb{\text{Z. }}j \in \left\lbrack 0,i \right) \Rightarrow a_{j} = j\)</span>）以及循环只改动了变量i及下标从0到i-1的数组a，还能指出循环一定会终止，以一个递减至零的循环变量的形式（loop variant），对于图1.3这个循环变量可以是"loop variant 10 - i"。</p>
+<p>对于循环，ACSL能够指出循环不变量（loop invariant）、循环所改动的内存区域（loop assigns）等，如图1.3中指出了两个循环不变量（<span class="math inline">\(i \in \left\lbrack 0,10 \right\rbrack\)</span> 和 <span class="math inline">\(\forall j \in \mathbb{\text{Z. }}j \in \left\lbrack 0,i \right) \Rightarrow a_{j} = j\)</span>）以及循环只改动了变量i及下标从0到i-1的数组a，还能指出循环一定会终止，以一个递减至零的循环变量的形式（loop variant），对于图1.3这个循环变量可以是&quot;loop variant 10 - i&quot;。</p>
 <p><img src="/images/report-on-frama-c-and-seahorn/image2.png" style="width:5.76806in;height:1.47708in"></p>
 <p>图1.2 对swap函数的ACSL规范</p>
 <p><img src="/images/report-on-frama-c-and-seahorn/image3.png" style="width:5.76806in;height:1.43194in"></p>
@@ -201,7 +201,7 @@
 <p>除此之外，为了使得分析插件的开发更加便利，核心组件提供了一系列的基础设施，包括对于用户参数的统一处理，对于用户操作记录的合成和重放，对于分析结果的序列化机制，以及一种AST遍历访问机制。</p>
 <p>项目（Project）的概念使得用户可以同时在多个C程序上使用 Frama-C，或是同时以不同的参数在同一C程序上使用Frama-C，一个项目保存了一个C程序所需的全部信息以及分析插件的参数及结果，这使得项目间完全分隔开来。项目也使得被插件处理过的AST与原始的AST一致，以便于参考及回溯。</p>
 <p>Frama-C 的插件之间有两种协作（通讯）方式，一种是简单的依赖关系，即一个分析插件可以使用其他一个或多个分析插件产生的结果，被称为依次序互操作，即这种互操作是按顺序进行。另一种更加有趣，其可以做到各分析插件同时进行，并相互操作，共同构造分析的结果，这种途径源于各插件可以写出ACSL（从AST层面上）作为约束条件。</p>
-<p>某个插件在无法由自身验证某个程序点的约束时可以将此约束写入ACSL，以委托其他插件验证。内核提供了将插件写入的ACSL集合起来供其他插件使用的能力。如Value插件本身无法验证指针p的合法性（即是否存在可能的NPD，空指针解引用），其将生成无法证明的ACSL注释"assert \valid(p)"，对 assert 的违背将导致分析终止，故Value现在可以认为此性质成立。而此性质随后将被WP插件证明，或是使用E-ACSL在运行期检查此性质的合法性。这种通讯方式使得插件间的互操作能力极大地增强。</p>
+<p>某个插件在无法由自身验证某个程序点的约束时可以将此约束写入ACSL，以委托其他插件验证。内核提供了将插件写入的ACSL集合起来供其他插件使用的能力。如Value插件本身无法验证指针p的合法性（即是否存在可能的NPD，空指针解引用），其将生成无法证明的ACSL注释&quot;assert \valid(p)&quot;，对 assert 的违背将导致分析终止，故Value现在可以认为此性质成立。而此性质随后将被WP插件证明，或是使用E-ACSL在运行期检查此性质的合法性。这种通讯方式使得插件间的互操作能力极大地增强。</p>
 <p>Frama-C实现了Frama-Clang以提供对C++程序的分析能力。此插件由两部分构成：第一部分是一个 Clang 插件（依赖libClang及LLVM，可支持到LLVM/Clang 9.0），其利用Clang解析C++代码以生成Clang AST，并简化此AST以便后续处理；第二部分是一个Frama-C插件，其将被简化的Clang AST转换为Frama-C AST（即 CIL）。这使得各个插件可以不被修改既可拥有对C++程序的分析功能。</p>
 <p>Frama-C也提供了GUI，以便各个分析的操作及结构更为直观，并拥有更强的交互能力。GUI提供了类似IDE的交互方式使得用户逐语句地、逐符号地了解分析结果。</p>
 <h3 id="特点及展望">特点及展望</h3>
@@ -263,7 +263,7 @@
 <p>SeaHorn将验证语义从操作语义中剥离令其对验证相关的技术更友好，特别是基于Horn子句的验证技术，CHC使得LLVM字节码中的验证条件被形式化，在验证时无需关心有未定义的行为。另一方面，SeaHorn的多语言优势使得其应用范围更大，更容易在不同语言中分析问题并归并结果。</p>
 <h1 id="其他工具">其他工具</h1>
 <h2 id="clang-static-analyzer-及-klee">Clang Static Analyzer 及 KLEE</h2>
-<p>Clang Static Analyzer（CSA） [13] [14]是基于LLVM/Clang的静态分析器，旨在发现源代码中的安全性缺陷及违背代码规范的片段。有趣的是，它并未使用LLVM IR，而是直接从Clang AST上建立控制流图，并在其上使用符号执行技术建立"爆炸图"（Exploded Graph）：将变量用符号模拟，通过约束求解（可以使用内置的求解器或委托给Z3 Prover）得出运行期可能存在的全部执行路径，并将路径放入图中。这使得图的节点数暴增，图的命名也许就来源于"路径爆炸"。为了分析内存安全问题，CSA还对内存堆进行建模以在符号执行期间随时模拟内存访问行为。 CSA正在通过clang-tidy（基于LLVM/Clang的"linter"，能够委托CSA进行分析）广泛应用于业界。</p>
+<p>Clang Static Analyzer（CSA） [13] [14]是基于LLVM/Clang的静态分析器，旨在发现源代码中的安全性缺陷及违背代码规范的片段。有趣的是，它并未使用LLVM IR，而是直接从Clang AST上建立控制流图，并在其上使用符号执行技术建立&quot;爆炸图&quot;（Exploded Graph）：将变量用符号模拟，通过约束求解（可以使用内置的求解器或委托给Z3 Prover）得出运行期可能存在的全部执行路径，并将路径放入图中。这使得图的节点数暴增，图的命名也许就来源于&quot;路径爆炸&quot;。为了分析内存安全问题，CSA还对内存堆进行建模以在符号执行期间随时模拟内存访问行为。 CSA正在通过clang-tidy（基于LLVM/Clang的&quot;linter&quot;，能够委托CSA进行分析）广泛应用于业界。</p>
 <p>KLEE [15]是基于LLVM的符号虚拟机，使用符号执行检查程序是否满足给定的约束条件。KLEE从LLVM IR入手分析，具有更强的语言适应能力，并在分析的过程上使用了比CSA更灵活的技术。</p>
 <p>比起Frama-C及SeaHorn，CSA于KLEE的目标并不是给出可靠的分析结果或是验证程序是否安全。CSA倾向于志在找到现实世界中复杂程序的缺陷，而KLEE旨在为复杂程序生成高覆盖率的测试。</p>
 <h2 id="boogie-vcc-及-smack">Boogie, VCC 及 SMACK</h2>
@@ -272,24 +272,24 @@
 <h1 id="引用">引用</h1>
 <hr>
 <hr>
-<p>[1] F. Kirchner, N. Kosmatov, V. Prevosto, J. Signoles and B. Yakobowski, "Frama-C: A software analysis perspective," <em>Formal Aspects of Computing,</em> pp. 573-609, 2015.</p>
+<p>[1] F. Kirchner, N. Kosmatov, V. Prevosto, J. Signoles and B. Yakobowski, &quot;Frama-C: A software analysis perspective,&quot; <em>Formal Aspects of Computing,</em> pp. 573-609, 2015.</p>
 <p>[2] L. Correnson, P. Cuoq, F. Kirchner, A. Maroneze, V. Prevosto, A. Puccetti, J. Signoles and B. Yakobowski, Frama-C User Manual, Release 20.0 (Calcium), 2018.</p>
 <p>[3] P. Baudin, P. Cuoq, J.-C. Filliâtre, C. Marché, B. Monate, Y. Moy and V. Prevosto, ACSL: ANSI/ISO C Specification Language, Version 1.14, 2018.</p>
-<p>[4] G. C. Necula, S. McPeak, S. P. Rahul and W. Weimer, "CIL: Intermediate Language and Tools for Analysis and Transformation of C Programs," in <em>International Conference on Compiler Construction</em>, 1.</p>
-<p>[5] A. Gurfinkel, T. Kahsai, A. Komuravelli and J. A. Navas, "The SeaHorn Verification Framework," in <em>International Conference on Computer Aided Verification</em>, 2015.</p>
-<p>[6] LLVM Developer Group, "The LLVM Compiler Infrastructure Project," [Online]. Available: http://llvm.org.</p>
-<p>[7] LLVM Developer Group, "Clang: a C language family frontend for LLVM," [Online]. Available: http://clang.llvm.org.</p>
-<p>[8] P. Cousot and R. Cousot, "Abstract interpretation: a unified lattice model for static analysis of programs by construction or approximation of fixpoints," in <em>Proceedings of the 4th ACM SIGACT-SIGPLAN symposium on Principles of programming languages</em>, 1977.</p>
-<p>[9] P. Godefroid, N. Klarlund and K. Sen, "DART: directed automated random testing," in <em>Proceedings of the 2005 ACM SIGPLAN conference on Programming language design and implementation</em>, 2005.</p>
-<p>[10] J. C. King, "Symbolic execution and program testing," <em>Communications of the ACM,</em> 1976.</p>
-<p>[11] D. Beyer, "Software Verification and Verifiable Witnesses (Report on SV-COMP 2015)," in <em>International Conference on Tools and Algorithms for the Construction and Analysis of Systems</em>, 2015.</p>
-<p>[12] A. Alshnakat, "SeaHorn Comparison to VCC and Frama-C," in <em>Automatic Verification of Embedded Systems Using Horn Clause Solvers</em>, 2019, pp. 52-54.</p>
-<p>[13] LLVM Developer Group, "Clang Static Analyzer," [Online]. Available: https://clang-analyzer.llvm.org.</p>
+<p>[4] G. C. Necula, S. McPeak, S. P. Rahul and W. Weimer, &quot;CIL: Intermediate Language and Tools for Analysis and Transformation of C Programs,&quot; in <em>International Conference on Compiler Construction</em>, 1.</p>
+<p>[5] A. Gurfinkel, T. Kahsai, A. Komuravelli and J. A. Navas, &quot;The SeaHorn Verification Framework,&quot; in <em>International Conference on Computer Aided Verification</em>, 2015.</p>
+<p>[6] LLVM Developer Group, &quot;The LLVM Compiler Infrastructure Project,&quot; [Online]. Available: http://llvm.org.</p>
+<p>[7] LLVM Developer Group, &quot;Clang: a C language family frontend for LLVM,&quot; [Online]. Available: http://clang.llvm.org.</p>
+<p>[8] P. Cousot and R. Cousot, &quot;Abstract interpretation: a unified lattice model for static analysis of programs by construction or approximation of fixpoints,&quot; in <em>Proceedings of the 4th ACM SIGACT-SIGPLAN symposium on Principles of programming languages</em>, 1977.</p>
+<p>[9] P. Godefroid, N. Klarlund and K. Sen, &quot;DART: directed automated random testing,&quot; in <em>Proceedings of the 2005 ACM SIGPLAN conference on Programming language design and implementation</em>, 2005.</p>
+<p>[10] J. C. King, &quot;Symbolic execution and program testing,&quot; <em>Communications of the ACM,</em> 1976.</p>
+<p>[11] D. Beyer, &quot;Software Verification and Verifiable Witnesses (Report on SV-COMP 2015),&quot; in <em>International Conference on Tools and Algorithms for the Construction and Analysis of Systems</em>, 2015.</p>
+<p>[12] A. Alshnakat, &quot;SeaHorn Comparison to VCC and Frama-C,&quot; in <em>Automatic Verification of Embedded Systems Using Horn Clause Solvers</em>, 2019, pp. 52-54.</p>
+<p>[13] LLVM Developer Group, &quot;Clang Static Analyzer,&quot; [Online]. Available: https://clang-analyzer.llvm.org.</p>
 <p>[14] A. Degrachev, Clang Static Analyzer: A Checker Developer's Guide, 2016.</p>
-<p>[15] C. Cadar, D. Dunbar and D. Engler, "KLEE: Unassisted and Automatic Generation of High-Coverage Tests for Complex Systems Programs," in <em>USENIX Symposium on Operating Systems Design and Implementation</em>, 2008.</p>
-<p>[16] K. Rustan and M. Leino, "This is Boogie 2," Microsoft Research, 2008.</p>
-<p>[17] E. Cohen, M. Dahlweid, M. Hillebrand, D. Leinenbach, M. Moskal, T. Santen, W. Schulte and S. Tobies, "VCC: A Practical System for Verifying Concurrent C," in <em>International Conference on Theorem Proving in Higher Order Logics</em>, 1.</p>
-<p>[18] Z. Rakamaric and M. Emmi, "SMACK: Decoupling Source Language Details from Verifier Implementations," in <em>International Conference on Computer-Aided Verification</em>, 2014.</p>
+<p>[15] C. Cadar, D. Dunbar and D. Engler, &quot;KLEE: Unassisted and Automatic Generation of High-Coverage Tests for Complex Systems Programs,&quot; in <em>USENIX Symposium on Operating Systems Design and Implementation</em>, 2008.</p>
+<p>[16] K. Rustan and M. Leino, &quot;This is Boogie 2,&quot; Microsoft Research, 2008.</p>
+<p>[17] E. Cohen, M. Dahlweid, M. Hillebrand, D. Leinenbach, M. Moskal, T. Santen, W. Schulte and S. Tobies, &quot;VCC: A Practical System for Verifying Concurrent C,&quot; in <em>International Conference on Theorem Proving in Higher Order Logics</em>, 1.</p>
+<p>[18] Z. Rakamaric and M. Emmi, &quot;SMACK: Decoupling Source Language Details from Verifier Implementations,&quot; in <em>International Conference on Computer-Aided Verification</em>, 2014.</p>
 
   </div>
 </article>
@@ -355,7 +355,7 @@
         
         <footer id="footer">
   <div class="footer-left">
-    Copyright &copy; 2022 Pragma Twice
+    Copyright &copy; 2023 Pragma Twice
   </div>
   <div class="footer-right">
     <nav>
