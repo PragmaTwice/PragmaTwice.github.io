@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="背景 形式化验证 形式化验证旨在用数学方法对系统建模以证明其正确性，特别是用以验证软件或硬件系统。其在真实的系统上构建对应的抽象数学模型，进而对抽象模型提供形式化证明以证明真实系统的正确性。对于针对软件的形式化验证，常用的技术包括模型检查、抽象解释及演绎验证等。 模型检查将程序视为状态机，用初始状态及状态转移函数描述系统，通过遍历程序的状态以验证程序的所有可能的状态都满足给定的性质。 一种常用的模">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Frama-C 及 SeaHorn 调查报告">
+<meta property="og:url" content="https://imtwice.com/report-on-frama-c-and-seahorn/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="背景 形式化验证 形式化验证旨在用数学方法对系统建模以证明其正确性，特别是用以验证软件或硬件系统。其在真实的系统上构建对应的抽象数学模型，进而对抽象模型提供形式化证明以证明真实系统的正确性。对于针对软件的形式化验证，常用的技术包括模型检查、抽象解释及演绎验证等。 模型检查将程序视为状态机，用初始状态及状态转移函数描述系统，通过遍历程序的状态以验证程序的所有可能的状态都满足给定的性质。 一种常用的模">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image1.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image2.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image3.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image4.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image5.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image6.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image7.png">
+<meta property="article:published_time" content="2020-07-01T10:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.108Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="frama-c">
+<meta property="article:tag" content="seahorn">
+<meta property="article:tag" content="static analysis">
+<meta property="article:tag" content="formal verification">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/report-on-frama-c-and-seahorn/image1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Frama-C 及 SeaHorn 调查报告</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/stacked-borrows/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/twices-anime-list/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-frama-c-and-seahorn/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/report-on-frama-c-and-seahorn/&text=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-frama-c-and-seahorn/&is_video=false&description=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Frama-C 及 SeaHorn 调查报告&body=Check out this article: https://imtwice.com/report-on-frama-c-and-seahorn/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-frama-c-and-seahorn/&name=Frama-C 及 SeaHorn 调查报告&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/report-on-frama-c-and-seahorn/&t=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%A2%E5%BC%8F%E5%8C%96%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.</span> <span class="toc-text">形式化验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">静态分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#frama-c"><span class="toc-number">2.1.</span> <span class="toc-text">Frama-C</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80"><span class="toc-number">2.1.1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.1.2.</span> <span class="toc-text">技术及实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%8F%8A%E5%B1%95%E6%9C%9B"><span class="toc-number">2.1.3.</span> <span class="toc-text">特点及展望</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#seahorn"><span class="toc-number">2.2.</span> <span class="toc-text">SeaHorn</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">技术及实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%8F%8A%E5%B1%95%E6%9C%9B-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">特点及展望</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-number">3.</span> <span class="toc-text">比较</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B1%E5%90%8C%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">共同点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">3.2.</span> <span class="toc-text">优缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E6%96%B9%E5%BC%8F%E5%8F%8A%E5%9C%BA%E6%99%AF"><span class="toc-number">3.3.</span> <span class="toc-text">应用方式及场景</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7"><span class="toc-number">4.</span> <span class="toc-text">其他工具</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#clang-static-analyzer-%E5%8F%8A-klee"><span class="toc-number">4.1.</span> <span class="toc-text">Clang Static Analyzer 及
+KLEE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boogie-vcc-%E5%8F%8A-smack"><span class="toc-number">4.2.</span> <span class="toc-text">Boogie, VCC 及 SMACK</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">引用</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Frama-C 及 SeaHorn 调查报告
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-01T10:00:00.000Z" class="dt-published" itemprop="datePublished">2020-07-01</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/reports/">reports</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/formal-verification/" rel="tag">formal verification</a>, <a class="p-category" href="/tags/frama-c/" rel="tag">frama-c</a>, <a class="p-category" href="/tags/seahorn/" rel="tag">seahorn</a>, <a class="p-category" href="/tags/static-analysis/" rel="tag">static analysis</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="背景">背景</h1>
+<h2 id="形式化验证">形式化验证</h2>
+<p>形式化验证旨在用数学方法对系统建模以证明其正确性，特别是用以验证软件或硬件系统。其在真实的系统上构建对应的抽象数学模型，进而对抽象模型提供形式化证明以证明真实系统的正确性。对于针对软件的形式化验证，常用的技术包括模型检查、抽象解释及演绎验证等。</p>
+<p>模型检查将程序视为状态机，用初始状态及状态转移函数描述系统，通过遍历程序的状态以验证程序的所有可能的状态都满足给定的性质。</p>
+<p>一种常用的模型检查方法使用时序逻辑式描述系统规范，被称为时序规范（Temporal
+Specifications）方法。这种方法将被规范的程序的可能的执行对应为此规范可能的模型，使用时序逻辑形式化程序语义以验证程序状态的正确性。</p>
+<p>抽象解释
+[8]在某些方面上能够被视为模型检查的，其是用以获得某些特定性质的验证技术，其将代码中的具体值映射到抽象值，并在抽象值域上演算以至收敛，从而在某个限度上反映运行时程序的演算。</p>
+<p>其主要基于演变系统（Transition System）、序理论（Order
+Theory）以及不动点定理（Fixed-point Theorem）。对于具体值域 <span
+class="math inline">\(C\)</span> 及其上的偏序关系 <span
+class="math inline">\(\subseteq\)</span> 与抽象值域 <span
+class="math inline">\(A\)</span> 及其上的偏序关系 <span
+class="math inline">\(\sqsubseteq\)</span>，其构成的完全格 <span
+class="math inline">\((C, \subseteq )\)</span> 与 <span
+class="math inline">\((A, \sqsubseteq )\)</span> 以及两个映射 <span
+class="math inline">\(\alpha:\ C \rightarrow A,\ \ \gamma:\ A
+\rightarrow C\)</span>，为使得分析结果可靠需满足伽罗瓦连接（Galois
+Connection），即 <span class="math inline">\(\forall c \in C,\ a \in A.\
+\alpha(c) \sqsubseteq a \Leftrightarrow c \subseteq
+\gamma(a)\)</span>，记作 <span class="math inline">\((C, \subseteq )
+\leftrightharpoons_{\alpha}^{\gamma}(A, \sqsubseteq
+)\)</span>。为使得语义函数在有限次的迭代下即可达到不动点，需使得语义函数为格上的单调函数。抽象解释的一个经典案例是区间分析（Interval
+Analysis）。</p>
+<p>演绎验证从系统规范出发产生一系列证明义务（Proof
+Obligations），并将其证明委托至定理证明器。其往往通过归纳法的方式得到不变量以保证程序状态的正确性。</p>
+<h2 id="静态分析">静态分析</h2>
+<p>静态分析在程序执行之前进行分析以理解其行为、确定一些特定的性质是否得到满足，其主要方法论为抽象与近似。一般来说，分析算法不需要关心程序的全部语义，而只需要理解算法的设计目标所感兴趣的语义子集。故程序的具体语义可以被映射到某个抽象域，进而进行分析，这种方法被称为抽象。而既然分析算法不可能给出完全确定的解，近似解也就成为其所追求的主要目标。分析算法将给出具体语义的近似，以得到尽可能精确的结果，这种方法被称为近似。</p>
+<p>静态分析随编译优化技术发展而来，其主要技术包括数据流分析、指针分析、过程间分析、符号执行及抽象解释等。其中，数据流指某些特定的数据在控制流图上变换及传播的过程，而对数据流进行分析的方法被称为数据流分析；指针分析旨在得到对象间的可能存在的引用关系，以构建更精确的调用图；过程间分析相对于过程内分析，指考虑到过程调用的分析方法，其在分析时需要考虑上下文敏感性。</p>
+<p>符号执行使用符号值代替具体值作为输入以近似程序的具体执行，并在分支处求解符号表达式构成的条件约束以确定执行路径的可能情况，从而使其往往比单元测试更加可靠。为了使符号值能够像具体值那样在程序中被执行，我们需要一个符号解释器以模拟程序的执行，并在赋值时形成符号表达式以广义地表达程序执行时具体值的可能情况。当遇到分支时，路径条件所对应的符号表达式即可委托SMT求解器以判断是否被满足。</p>
+<h1 id="介绍">介绍</h1>
+<h2 id="frama-c">Frama-C</h2>
+<p>一些新的软件分析、验证及测试技术如抽象解释（Abstract
+Interpretation）、Concolic测试（Concolic Testing）及演绎验证（Deductive
+Verification）等在过去的几十年中被提出。但在运用到工业界的过程中遇到了挑战，如如何使得现有的技术适应大规模的业界代码、理解业界常用的语言特性对大规模代码结构的影响；如何使得各种分析技术可以互相协作；以及如何使得分析的结果可靠（Sound），即可以给出不存在未被发现的对约束的违背的证明。</p>
+<p>Frama-C [1] [2]旨在构建一个可以解决上述问题的、对C语言（ISO
+C99）代码的软件分析验证平台。平台的核心提供了插件系统使得构建在其上的检查插件能够互相依赖、协作，并使用ACSL作为规范语言提供约束。在程序分析方面，Frama-C并不仅局限于静态分析，其有动态分析的能力，以及提供各种交互式分析的发展空间。</p>
+<p><img src="/images/report-on-frama-c-and-seahorn/image1.png"
+style="width:5.76806in;height:2.29861in" /></p>
+<p>表1.1 Frama-C 插件及描述</p>
+<p>Frama-C
+的分析及验证算法完全实现在各个插件上，主要的插件如表1.1。这些插件实现了广泛的程序分析技术，并建立起插件间的基于约束的依赖关系。其中不仅包括上文中提到的分析技术，还包含了依赖分析（Dependency
+Analysis）、程序切片（Program Slicing）等。</p>
+<p>ACSL（ANSI/ISO C Specification Language）
+[3]是C语言的规范语言，实现了对于C语言的约束编程（Constraint
+Programming）。其可以用类似霍尔逻辑的方式指定C语言代码如函数、循环等的特性及约束，并以嵌入注释块的方式避免扩展C语法带来的兼容性问题。</p>
+<p>对于函数，ACSL能够指出其在初始时满足什么条件（requires），在执行结束后满足什么约束（ensures），以及在执行过程中改动了哪些内存区域（assigns）等，如图1.2中swap函数的ACSL指出其需要在函数被执行前指针
+a, b 合法且所指向的内存区域不重叠、保证在函数被执行后 *a 值与 *b
+值被交换、且函数仅改动了内存中 *a, *b 的值。</p>
+<p>对于循环，ACSL能够指出循环不变量（loop
+invariant）、循环所改动的内存区域（loop
+assigns）等，如图1.3中指出了两个循环不变量（<span
+class="math inline">\(i \in \left\lbrack 0,10 \right\rbrack\)</span> 和
+<span class="math inline">\(\forall j \in \mathbb{\text{Z. }}j \in
+\left\lbrack 0,i \right) \Rightarrow a_{j} =
+j\)</span>）以及循环只改动了变量i及下标从0到i-1的数组a，还能指出循环一定会终止，以一个递减至零的循环变量的形式（loop
+variant），对于图1.3这个循环变量可以是"loop variant 10 - i"。</p>
+<p><img src="/images/report-on-frama-c-and-seahorn/image2.png"
+style="width:5.76806in;height:1.47708in" /></p>
+<p>图1.2 对swap函数的ACSL规范</p>
+<p><img src="/images/report-on-frama-c-and-seahorn/image3.png"
+style="width:5.76806in;height:1.43194in" /></p>
+<p>图1.3 对数组赋值循环的ACSL规范</p>
+<p>CIL（C Intermediate Language）
+[4]是一种高阶中间语言，并包含一系列工具，以使在其上进行的程序分析及代码变换更简便。比起直接由C的语法构建AST，CIL将C中一些复杂结构用简单的结构表示；而比起类似三地址码的低阶IR，CIL具有更高阶的语言结构。由于忽略了AST中冗余的语义信息、丰富了低阶IR丢失的语义信息，程序分析更容易在CIL上进行。</p>
+<h3 id="理论基础">理论基础</h3>
+<p>Frama-C提供Value插件进行基于抽象解释的值分析（Value
+Analysis），其在前向数据流分析的基础上完成对整个程序的分析。</p>
+<p>在Frama-C中，演绎验证由WP插件完成。WP插件实现了最弱前提（Weakest
+Precondition）演算为ACSL注释提供验证条件。</p>
+<p>Concolic测试 [9]旨在通过符号执行（Symbolic Execution）
+[10]获得每条执行路径的约束，从而生成具有更大路径覆盖率的输入，以丰富测试用例。其主旨并不是验证程序正确性，而是通过提高测试覆盖率发现软件缺陷。PathCrawler插件为Frama-C提供Concolic测试技术，其使用Colibri作为约束求解工具。</p>
+<h3 id="技术及实现">技术及实现</h3>
+<p><img src="/images/report-on-frama-c-and-seahorn/image4.png"
+style="width:5.76806in;height:3.25486in" /></p>
+<p>图1.4 Frama-C 功能结构</p>
+<p>Frama-C
+使用OCaml编写，由三部分构成，在CIL的基础上构造了核心组件，为上层的分析插件提供基本的代码解析、操作日志、插件通讯、AST遍历等服务接口。
+而所有的分析算法以插件的形式模块化地被实现，如图1.4。</p>
+<p>Frama-C
+的核心组件提供了一个修改版的CIL，其将C语言代码转换为一种中间表示（下文也称为AST），这种中间表示消除了一些对于程序分析无意义的语言细节，如不同的种类的循环、复杂的带有副作用的表达式等。被修改的CIL同时提供了解析ACSL为AST的能力，这使得规范语言的语义与C语言语义可以以同样的方式被呈现。</p>
+<p>除此之外，为了使得分析插件的开发更加便利，核心组件提供了一系列的基础设施，包括对于用户参数的统一处理，对于用户操作记录的合成和重放，对于分析结果的序列化机制，以及一种AST遍历访问机制。</p>
+<p>项目（Project）的概念使得用户可以同时在多个C程序上使用
+Frama-C，或是同时以不同的参数在同一C程序上使用Frama-C，一个项目保存了一个C程序所需的全部信息以及分析插件的参数及结果，这使得项目间完全分隔开来。项目也使得被插件处理过的AST与原始的AST一致，以便于参考及回溯。</p>
+<p>Frama-C
+的插件之间有两种协作（通讯）方式，一种是简单的依赖关系，即一个分析插件可以使用其他一个或多个分析插件产生的结果，被称为依次序互操作，即这种互操作是按顺序进行。另一种更加有趣，其可以做到各分析插件同时进行，并相互操作，共同构造分析的结果，这种途径源于各插件可以写出ACSL（从AST层面上）作为约束条件。</p>
+<p>某个插件在无法由自身验证某个程序点的约束时可以将此约束写入ACSL，以委托其他插件验证。内核提供了将插件写入的ACSL集合起来供其他插件使用的能力。如Value插件本身无法验证指针p的合法性（即是否存在可能的NPD，空指针解引用），其将生成无法证明的ACSL注释"assert
+\valid(p)"，对 assert
+的违背将导致分析终止，故Value现在可以认为此性质成立。而此性质随后将被WP插件证明，或是使用E-ACSL在运行期检查此性质的合法性。这种通讯方式使得插件间的互操作能力极大地增强。</p>
+<p>Frama-C实现了Frama-Clang以提供对C++程序的分析能力。此插件由两部分构成：第一部分是一个
+Clang 插件（依赖libClang及LLVM，可支持到LLVM/Clang
+9.0），其利用Clang解析C++代码以生成Clang
+AST，并简化此AST以便后续处理；第二部分是一个Frama-C插件，其将被简化的Clang
+AST转换为Frama-C AST（即
+CIL）。这使得各个插件可以不被修改既可拥有对C++程序的分析功能。</p>
+<p>Frama-C也提供了GUI，以便各个分析的操作及结构更为直观，并拥有更强的交互能力。GUI提供了类似IDE的交互方式使得用户逐语句地、逐符号地了解分析结果。</p>
+<h3 id="特点及展望">特点及展望</h3>
+<p>与工业界目前使用的一些分析工具（如 Clang Static
+Analyzer、CppCheck、Coverity
+等）不同，Frama-C具有可靠性。工业界绝大多数分析工具在分析过后只能给出既不可靠（Sound）又不完备（Complete）的结果，而Frama-C的分析结果保证了安全。</p>
+<p>尤其引人注目的是，Frama-C的插件系统使得各种分析及验证技术之间具有很强的互操作性。这使得这些技术功能紧密结合起来共同参与分析，从而使得分析的结果更具有普适性。</p>
+<p>在软件工程上看，模块化是Frama-C的显著优势，通过插件和项目机制，Frama-C能够做到低耦合，高内聚地完成各种分析算法，使得逻辑之间不会过度相互干扰，而又可以以一种合理的方式相互依赖。</p>
+<p>通过上面的几点，Frama-C使得大规模代码的分析及验证成为可能。对于业界大量的代码，Frama-C能以合理的方式组织分析逻辑，以大量的插件覆盖分析的能力范围，使得到的分析结果足够有意义。</p>
+<p>Frama-C正在被广泛关注，无论是学术界还是工业界。其已经有12年的历史，现在已经形成了丰富的插件生态，以及活跃的用户及开发者社区。</p>
+<p>在学术上，许多课题组使用Frama-C实现新的分析技术，或是应用Frama-C完成对于一些问题的分析，如插件Jessie使用Why3完成了演绎验证；一些研究者在其上面实现了污点分析（Taint
+Analysis）；有人将Frama-C用于验证智能卡上的物理攻击；或是使用ACSL提供对于最坏情况下运行时间成本的断言。</p>
+<p>在工业界，许多公司在尝试使用Frama-C。有的公司尝试使用Frama-C构建对于特定的代码规范的验证，或是使用Value插件验证控制流及数据流的正确性。通过Frama-C也能够找到知名开源软件中的缺陷，如QuickLZ、PolarSSL等。</p>
+<h2 id="seahorn">SeaHorn</h2>
+<p>SeaHorn
+[5]是一个基于LLVM的软件验证框架，其最重要的特点是借助模块化的设计将编程语言的具体语法、操作语义和验证语义分开处理。</p>
+<p>SeaHorn具有几个显著的特色，它使用了既高效又精确的过程间分析技术编码验证条件（Verification
+Conditions）,提供了对验证精度的灵活控制，利用了抽象解释和模型验证的最新成果，以及使用Horn子句（Horn
+Clauses）作为验证条件的中间表示，使得不同的验证工具可以在统一接口下工作。</p>
+<p>SeaHorn不仅可以自动地验证用户给定的断言，还能验证关于软件安全的固有性质，如其提供了对于缓冲区溢出和整形溢出的内置检查。</p>
+<p>LLVM项目
+[6]提供了模块化的编译技术及其工具链、支持库，旨在同时使学术界和工业界使用这些技术。其核心库提供了与源代码及目标（机器）代码无关的优化器及一中低阶的中间表示（LLVM
+IR），并提供了从LLVM IR 到多种流行的架构的代码生成。</p>
+<p>LLVM项目提供了Clang [7]作为C、C++、Objective C 语言的前端生成LLVM
+IR（或称为
+LLVM字节码），还有一大批其他语言（如Rust、Go、Swift等）选择LLVM
+IR作为中间表示或是提供了对LLVM
+IR的代码生成。这使得许多语言都可以使用LLVM相关的或是基于LLVM工具，针对LLVM
+IR的技术具有广泛的应用空间。</p>
+<p>Horn子句（Horn Clauses）是最多存在一个真值项的析取式，对于原子 <span
+class="math inline">\(p,\ q,\ \ldots,\ t,\ u\)</span>, Horn子句可以写作
+<span class="math inline">\(\neg p \vee \neg q \vee ... \vee \neg t \vee
+u\)</span> 或是 <span class="math inline">\(u \leftarrow p \land q \land
+\ldots \land t\)</span>。而CHC（Constrained Horn
+Clauses）用以描述验证条件，对于函数符号、谓词符号及变量的集合<span
+class="math inline">\(\mathcal{F,\ P,\ V}\)</span>，可表示为 <span
+class="math inline">\(\mathcal{\forall V}.\ h\lbrack X\rbrack \leftarrow
+\phi \land p_{1}\lbrack X_{1}\rbrack \land ... \land p_{k}\lbrack
+X_{k}\rbrack,\ \ k \geq 0\)</span>,其中 <span
+class="math inline">\(\phi\)</span> 是对于 <span
+class="math inline">\(\mathcal{F}\)</span> 和 <span
+class="math inline">\(\mathcal{V}\)</span> 的约束，<span
+class="math inline">\(X,X_{i}\mathcal{\subseteq V}\)</span>, <span
+class="math inline">\(p \in \mathcal{P}\)</span>，<span
+class="math inline">\(h\)</span>可能属于<span
+class="math inline">\(\mathcal{P}\)</span>, 也可能不属于。简记为<span
+class="math inline">\(h\lbrack X\rbrack \leftarrow \phi,p_{1}\lbrack
+X_{1}\rbrack,...,p_{k}\lbrack X_{k}\rbrack\)</span>。</p>
+<h3 id="理论基础-1">理论基础</h3>
+<p>SeaHorn的抽象解释在早期版本中由IKOS直接提供，而在目前的版本中使用了自主开发、基于IKOS的Crab。为了避免抽象域在迭代时的精度丢失，IKOS更适合为其他验证引擎提供不变量，而不是单独作为后端引擎。</p>
+<p>SeaHorn使用了基于SMT的模型检查程序SPACER，其与其他基于SMT的算法的区别在于在检查程序的合法性时会不断生成对个别过程或Horn子句的未知谓词的局部可达性的询问。</p>
+<h3 id="技术及实现-1">技术及实现</h3>
+<p><img src="/images/report-on-frama-c-and-seahorn/image5.png"
+style="width:5.76806in;height:2.12708in" /></p>
+<p>图1.5 SeaHorn的基本结构</p>
+<p>SeaHorn使用C++编写，提供了一个可供扩展及自定义的框架以支持在其上实现新的分析技术。它基于LLVM
+5.0，将整体结构划分为三层，如图1.5。</p>
+<p>前端的作用是对程序做预处理（指代码解析、代码优化等）以生成LLVM
+IR,这个步骤会对之后的验证产生重大的影响。SeaHorn的早期版本提供了两个不同的前端。一种是旧版，仅支持C语言（ISO
+C99），主要用于参加SV-COMP（Competition on Software
+Verification，TACAS）而开发的前端。其首先使用CIL处理代码，以做一些琐碎的代码变换，如插入隐式定义的函数，初始化局部变量等，随后使用llvm-gcc（此工具仅存在于LLVM的早期版本2.x，随后被DragonEgg替代）将其转换为LLVM
+IR。然后将进行一些代码优化以方便之后的验证，如初始化未被初始化的寄存器，内联函数，转换为SSA形式，消除不可达代码，简化控制流图等（这些功能大部分由LLVM本身提供）。由于这个旧版前端不够模块化，使用了一些被废弃的工具，且只支持C语言，故有很大的局限性且难以维护。</p>
+<p>新的前端被称为过程间前端，支持任意可以转换到LLVM
+IR的程序代码，这使得语言的局限性被打破，如C、C++、Rust等语言都可以使用此前端。对于LLVM
+IR，此前端有两部分处理组件，第一部分类似旧版的处理，以方便之后的验证；第二部分则致力于简化代码变换的范围以至于即使关闭这个预处理过程之后的验证也会得出正确的结果。在处理断言可能在调用图中过深的问题时，其使用混合语义（Mixed
+Semantics）的概念处理代码，其核心思想是当函数可能失败时将函数内联入调用点（保留原函数），而将原函数内的断言（assert）替换为假设（assume），此时当函数成功时会进入原函数，使得这种替换是安全的。</p>
+<p>SeaHorn的中端在输入的LLVM IR中得到以CHC（Constrained Horn
+Clauses）为表示的验证条件，并可以调节编码及精度。其提供了两种验证条件的编码方式，一种被称为小步编码（SSE,
+Small-Step Encoding），另一种被称为大块编码（LBE, Large-Block
+Encoding），用户可以选择一种编码以生成CHC，通常LBE效率更高，而SSE的结果更有意义。一个使用LBE生成CHC的示例如图1.6，此程序包含了一个未确定终止条件的循环以及两个在循环中被赋值的变量，而我们希望证明在循环结束时
+<span class="math inline">\(x \geq
+y\)</span>。对应于控制流图中的每一个基本块 <span
+class="math inline">\(l_{i}\)</span>，都有一个以 <span
+class="math inline">\(p_{i}(x_{1},...x_{n})\)</span>
+为头部的Horn子句被编码，其中 <span class="math inline">\(\{
+x_{1},...x_{n}\mathcal{\} \subseteq V}\)</span> 是在基本块 <span
+class="math inline">\(l_{i}\)</span> 中的活变量（Live
+Variables）的集合，<span class="math inline">\(p_{i}\mathcal{\in
+P}\)</span>。子句 <span class="math inline">\(\left\langle 1
+\right\rangle\)</span> 指出基本块 <span
+class="math inline">\(l_{0}\)</span> 可达，子句 <span
+class="math inline">\(\left\langle 2 \right\rangle\)</span> 指出若基本块
+<span class="math inline">\(l_{0}\)</span> 可达则 <span
+class="math inline">\(l_{1}\)</span> 可达，且在此程序点 <span
+class="math inline">\(x = 1 \land y = 0\)</span>，而子句 <span
+class="math inline">\(\left\langle 5 \right\rangle\)</span> 指出控制流从
+<span class="math inline">\(l_{2}\)</span> 到 <span
+class="math inline">\(l_{1}\)</span> 时变量的状态发生变化，即<span
+class="math inline">\(x‘ = x + y \land y’ = y + 1\)</span>。</p>
+<p><img src="/images/report-on-frama-c-and-seahorn/image6.png"
+style="width:5.76806in;height:3.12153in" /></p>
+<p>图1.6 (a)程序代码 (b)控制流图 (c)验证条件 对照示例</p>
+<p>中端中还包括了具有不同抽象级别的验证语义生成，以供用户调节，从低精度到高精度分别是：仅对数值寄存器进行建模；对数值及地址（被建模为整数）寄存器进行建模，不包括内存申请的地址；对数值、地址寄存器及内存堆（被建模为不重叠的数组的集合）建模。</p>
+<p>其后端将CHC作为输入最终得到分析结果。SeaHorn使用了基于SMT的模型检查引擎如SPACER及GDPR，还使用了基于抽象解释的分析器IKOS（Inference
+Kernel for Open Static
+Analyzers）。CHC作为统一表示使得验证条件可以将多种引擎用于SeaHorn。</p>
+<h3 id="特点及展望-1">特点及展望</h3>
+<p>SeaHorn 使用LLVM
+IR及CHC将编程语言的具体语法同验证技术所需要的语义分割开来，使得验证、分析工作不需要在琐碎的、没有必要的语法细节上耗费时间。它使用LLVM将特定语言代码处理为LLVM
+IR以忽略语言细节，并简化、形式化语义，而后使用CHC表示验证条件。这样的分层使得不同阶段的工作被分隔开，以减轻新技术实现的工作量。</p>
+<p>它使用新的过程间分析技术确保分析的高效和精确。它可以将调用图深处的断言提升到主函数中，在不内联的情况下得到函数的数据流，以及不把表达力限制在线性算术上。</p>
+<p>对于开发者，它可以提供自定义验证语义的能力；而对于用户，有多种验证精度可以调节。不仅可以选择LBE或是SSE，还可以自动地由SSE提升为LBE；而对于验证的建模也可以在仅数值寄存器到包含内存堆间选择。</p>
+<p>它使用CHC作为验证语义的中间语言，从而灵活地提供了对于验证条件的多种编码方式。CHC还使得SeaHorn具有了对多种验证工具的兼容能力。</p>
+<p>它构建在LLVM之上，这使得对于LLVM的其他工作可以轻易地被SeaHorn利用，包括新的语言的前端可以无更改地被SeaHorn支持，适用于LLVM的代码变化工具以及周边工具也能够被SeaHorn使用。</p>
+<p>SeaHorn在SV-COMP 2015
+[11]中的控制流分析及驱动程序分析方面取得了第二名的成绩，并在对工业级自动驾驶软件的代码分析时结果能够不弱于来自NASA
+Ames研究中心的分析器。</p>
+<h1 id="比较">比较</h1>
+<h2 id="共同点">共同点</h2>
+<p>Frama-C和SeaHorn都保证其对于程序行为的近似结果的可靠性，即若分析结果为安全则一定是安全的。这个特点为其应用于工业界提供了保障，用户无需担心分析过后是否有可能的错误运行，这使它们与某些启发式的分析引擎区分开。</p>
+<p>模块化的结构是Frama-C和SeaHorn的显著特征。Frama-C将分析及验证技术构件在被剥离出的核心框架之外，使这些技术作为插件并提供互相沟通的能力使它们合作完成分析任务；而SeaHorn将架构分为三层，不同层间有各自的任务及表述形式，使得各层之间互相独立，利于维护。</p>
+<p>模块化使得这两个平台都提供了相当的扩展性。Frama-C的插件生态丰富，许多学者使用Frama-C以减轻新分析理论的实现成本；SeaHorn提供给用户及开发者多种对编码及精度的调控，以统一的接口对接了多个验证工具。</p>
+<p>两者都从中间语言入手分析，以将关注点放在与程序安全性相关的语义上。Frama-C使用CIL预处理C语言代码，使得分析不受一些纯语法的语言结构干扰；（使用新版前端的）SeaHorn从LLVM字节码着手分析，使得许多高阶的语义得到分解。</p>
+<p>验证语义的抽象和结构化是两者的工作之一。SeaHorn使用CHC统一表示验证条件，使得多种后端可以被嵌入并协调工作；Frama-C使用ACSL作为程序性质通用表示形式，并将插件间通讯能力建立在其上。</p>
+<p>两者都使用了抽象解释以提供对实际执行的近似解。在Frama-C中这个技术由Value插件提供，而在（新版后端的）SeaHorn中由子项目Crab提供。</p>
+<h2 id="优缺点">优缺点</h2>
+<p>SeaHorn 基于LLVM，并使用LLVM
+IR作为前端的输入语言在中端被处理为CHC，这使得它具有广泛的语言适应能力，丰富的、参与了LLVM生态的语言如C、C++、Rust、Go、Swift等都能够直接进行分析；而Frama-C基于CIL，这限制了其语言处理能力，虽然其提供了Frama-Clang用以借助Clang前端将C、C++及Objective
+C，但依旧无法与SeaHorn的语言普适性相提并论。另一方面，CIL提供了更高抽象层次的中间表示，这使得它更容易进行语言特性相关的分析；而SeaHorn既无法顾及各语言的特定结构（即使LLVM可以通过Metadata传递高级信息），也不能像Frama-C那样扩展CIL以提供对程序性质的描述。</p>
+<p>Frama-C对插件及项目的抽象使得其在模块化方面更胜一筹，这让不同技术间能够逻辑独立并以规范的方式相交互。配合比SeaHorn更长的历史，Frama-C已经被学界广泛接受并用以实现新技术，其第三方插件数量远多于SeaHorn后端的验证模块。</p>
+<p>在验证语义上看，SeaHorn使用CHC作为验证条件的统一表示，并在中端将LLVM字节码转换为CHC，使操作语义与验证语义相分离，让后端的验证在CHC上进行，而不必关心LLVM
+IR的细节；而Frama-C仅将源代码处理为CIL，并将ACSL也用CIL的方式表述，使得其对验证语义的表示并不独立，在一定程度上增加了插件实现的工作量。</p>
+<p>在涉及的技术范围上看，Frama-C不仅使用了静态分析技术，还应用了动态分析技术及软件测试技术。它使用PathCrawler插件提供Concolic测试技术，使用E-ACSL插件以实现在运行期检查程序是否遵循了ACSL注释，使用Slicing插件提供程序切片技术，使用Mthread插件扩展Value插件以实现对并行程序行为的近似，提供了Sante插件使用测试技术增强静态分析结果，旨在发现运行期可能的除以零错误及数组越界等。</p>
+<p>Sante插件是Frama-C综合各种分析技术以实现更精确的分析的典范：其首先使用Value插件分析程序以发现可能存在的缺陷，并在缺陷处使用Slicing插件得到一些切片，随后PathCrawler插件将被用于发现每个切片引发实际错误的执行路径的测试用例，而被发现与Value分析结果一致的测试用例所对应的缺陷则会被报告给用户，如图2.1。对比Frama-C，SeaHorn所使用的分析、验证技术便略显单一。</p>
+<p><img src="/images/report-on-frama-c-and-seahorn/image7.png"
+style="width:5.76806in;height:3.35in" /></p>
+<p>图2.1 Sante插件工作流程概览</p>
+<p>在一次已知的实际比较
+[12]中，SeaHorn被证实可以以更快的运行速度和更少的代码开销验证近乎于Frama-C两倍的需求。且得出这样的结论所作的实验中，对Frama-C的操作由经验丰富的用户完成，而对SeaHorn进行操作的用户是首次使用SeaHorn。</p>
+<h2 id="应用方式及场景">应用方式及场景</h2>
+<p>Frama-C与SeaHorn都致力于以统一的框架为学术界和工业界提供帮助，并获得了不同程度的成功。Frama-C早已成为软件分析及验证研究者的技术实现工具，安全学者的应用工具，以及工业界对于重要软件的实验性质量保证工具；SeaHorn借助SV-COMP及对航天软件的验证实例证实了其具有较高的可用性及扩展性。</p>
+<p>Frama-C更适合更广泛的程序分析技术开发及使用。对CIL的增强及众多涉及不同领域技术的插件使得新技术的开发更易结合已有的技术进行，而综合来看Frama-C对核心框架的设计足够饱满，内含了足够的基础设施以支持新插件的开发。</p>
+<p>SeaHorn将验证语义从操作语义中剥离令其对验证相关的技术更友好，特别是基于Horn子句的验证技术，CHC使得LLVM字节码中的验证条件被形式化，在验证时无需关心有未定义的行为。另一方面，SeaHorn的多语言优势使得其应用范围更大，更容易在不同语言中分析问题并归并结果。</p>
+<h1 id="其他工具">其他工具</h1>
+<h2 id="clang-static-analyzer-及-klee">Clang Static Analyzer 及
+KLEE</h2>
+<p>Clang Static Analyzer（CSA） [13]
+[14]是基于LLVM/Clang的静态分析器，旨在发现源代码中的安全性缺陷及违背代码规范的片段。有趣的是，它并未使用LLVM
+IR，而是直接从Clang
+AST上建立控制流图，并在其上使用符号执行技术建立"爆炸图"（Exploded
+Graph）：将变量用符号模拟，通过约束求解（可以使用内置的求解器或委托给Z3
+Prover）得出运行期可能存在的全部执行路径，并将路径放入图中。这使得图的节点数暴增，图的命名也许就来源于"路径爆炸"。为了分析内存安全问题，CSA还对内存堆进行建模以在符号执行期间随时模拟内存访问行为。
+CSA正在通过clang-tidy（基于LLVM/Clang的"linter"，能够委托CSA进行分析）广泛应用于业界。</p>
+<p>KLEE
+[15]是基于LLVM的符号虚拟机，使用符号执行检查程序是否满足给定的约束条件。KLEE从LLVM
+IR入手分析，具有更强的语言适应能力，并在分析的过程上使用了比CSA更灵活的技术。</p>
+<p>比起Frama-C及SeaHorn，CSA于KLEE的目标并不是给出可靠的分析结果或是验证程序是否安全。CSA倾向于志在找到现实世界中复杂程序的缺陷，而KLEE旨在为复杂程序生成高覆盖率的测试。</p>
+<h2 id="boogie-vcc-及-smack">Boogie, VCC 及 SMACK</h2>
+<p>如SeaHorn的CHC或是Frama-C加入ACSL支持的CIL那样，Boogie
+[16]是一种中间验证语言，旨在为验证技术提供语言层的抽象。与其同名的工具Boogie对于给定的Boogie中间语言程序生成验证条件，以传入一些约束求解器得到结果。VCC
+[17]构建在Boogie之上，旨验证并行C语言程序，而SMACK [18]提供了从LLVM
+IR到Boogie语言的转换能力。</p>
+<p>与Frama-C和SeaHorn不同的是，Boogie本身不能被称为是一个框架，没有提供插件机制所需的基础设施以及使得建立在其上的验证技术相互利用的统一接口，这可能使得基于Boogie实现验证技术需要更多的工作量。</p>
+<h1 id="引用">引用</h1>
+<hr />
+<hr />
+<p>[1] F. Kirchner, N. Kosmatov, V. Prevosto, J. Signoles and B.
+Yakobowski, "Frama-C: A software analysis perspective," <em>Formal
+Aspects of Computing,</em> pp. 573-609, 2015.</p>
+<p>[2] L. Correnson, P. Cuoq, F. Kirchner, A. Maroneze, V. Prevosto, A.
+Puccetti, J. Signoles and B. Yakobowski, Frama-C User Manual, Release
+20.0 (Calcium), 2018.</p>
+<p>[3] P. Baudin, P. Cuoq, J.-C. Filliâtre, C. Marché, B. Monate, Y. Moy
+and V. Prevosto, ACSL: ANSI/ISO C Specification Language, Version 1.14,
+2018.</p>
+<p>[4] G. C. Necula, S. McPeak, S. P. Rahul and W. Weimer, "CIL:
+Intermediate Language and Tools for Analysis and Transformation of C
+Programs," in <em>International Conference on Compiler
+Construction</em>, 1.</p>
+<p>[5] A. Gurfinkel, T. Kahsai, A. Komuravelli and J. A. Navas, "The
+SeaHorn Verification Framework," in <em>International Conference on
+Computer Aided Verification</em>, 2015.</p>
+<p>[6] LLVM Developer Group, "The LLVM Compiler Infrastructure Project,"
+[Online]. Available: http://llvm.org.</p>
+<p>[7] LLVM Developer Group, "Clang: a C language family frontend for
+LLVM," [Online]. Available: http://clang.llvm.org.</p>
+<p>[8] P. Cousot and R. Cousot, "Abstract interpretation: a unified
+lattice model for static analysis of programs by construction or
+approximation of fixpoints," in <em>Proceedings of the 4th ACM
+SIGACT-SIGPLAN symposium on Principles of programming languages</em>,
+1977.</p>
+<p>[9] P. Godefroid, N. Klarlund and K. Sen, "DART: directed automated
+random testing," in <em>Proceedings of the 2005 ACM SIGPLAN conference
+on Programming language design and implementation</em>, 2005.</p>
+<p>[10] J. C. King, "Symbolic execution and program testing,"
+<em>Communications of the ACM,</em> 1976.</p>
+<p>[11] D. Beyer, "Software Verification and Verifiable Witnesses
+(Report on SV-COMP 2015)," in <em>International Conference on Tools and
+Algorithms for the Construction and Analysis of Systems</em>, 2015.</p>
+<p>[12] A. Alshnakat, "SeaHorn Comparison to VCC and Frama-C," in
+<em>Automatic Verification of Embedded Systems Using Horn Clause
+Solvers</em>, 2019, pp. 52-54.</p>
+<p>[13] LLVM Developer Group, "Clang Static Analyzer," [Online].
+Available: https://clang-analyzer.llvm.org.</p>
+<p>[14] A. Degrachev, Clang Static Analyzer: A Checker Developer's
+Guide, 2016.</p>
+<p>[15] C. Cadar, D. Dunbar and D. Engler, "KLEE: Unassisted and
+Automatic Generation of High-Coverage Tests for Complex Systems
+Programs," in <em>USENIX Symposium on Operating Systems Design and
+Implementation</em>, 2008.</p>
+<p>[16] K. Rustan and M. Leino, "This is Boogie 2," Microsoft Research,
+2008.</p>
+<p>[17] E. Cohen, M. Dahlweid, M. Hillebrand, D. Leinenbach, M. Moskal,
+T. Santen, W. Schulte and S. Tobies, "VCC: A Practical System for
+Verifying Concurrent C," in <em>International Conference on Theorem
+Proving in Higher Order Logics</em>, 1.</p>
+<p>[18] Z. Rakamaric and M. Emmi, "SMACK: Decoupling Source Language
+Details from Verifier Implementations," in <em>International Conference
+on Computer-Aided Verification</em>, 2014.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%A2%E5%BC%8F%E5%8C%96%E9%AA%8C%E8%AF%81"><span class="toc-number">1.1.</span> <span class="toc-text">形式化验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">静态分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#frama-c"><span class="toc-number">2.1.</span> <span class="toc-text">Frama-C</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80"><span class="toc-number">2.1.1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.1.2.</span> <span class="toc-text">技术及实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%8F%8A%E5%B1%95%E6%9C%9B"><span class="toc-number">2.1.3.</span> <span class="toc-text">特点及展望</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#seahorn"><span class="toc-number">2.2.</span> <span class="toc-text">SeaHorn</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">理论基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">技术及实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%8F%8A%E5%B1%95%E6%9C%9B-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">特点及展望</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-number">3.</span> <span class="toc-text">比较</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B1%E5%90%8C%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">共同点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">3.2.</span> <span class="toc-text">优缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E6%96%B9%E5%BC%8F%E5%8F%8A%E5%9C%BA%E6%99%AF"><span class="toc-number">3.3.</span> <span class="toc-text">应用方式及场景</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7"><span class="toc-number">4.</span> <span class="toc-text">其他工具</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#clang-static-analyzer-%E5%8F%8A-klee"><span class="toc-number">4.1.</span> <span class="toc-text">Clang Static Analyzer 及
+KLEE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boogie-vcc-%E5%8F%8A-smack"><span class="toc-number">4.2.</span> <span class="toc-text">Boogie, VCC 及 SMACK</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">引用</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-frama-c-and-seahorn/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/report-on-frama-c-and-seahorn/&text=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-frama-c-and-seahorn/&is_video=false&description=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Frama-C 及 SeaHorn 调查报告&body=Check out this article: https://imtwice.com/report-on-frama-c-and-seahorn/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/report-on-frama-c-and-seahorn/&title=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-frama-c-and-seahorn/&name=Frama-C 及 SeaHorn 调查报告&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/report-on-frama-c-and-seahorn/&t=Frama-C 及 SeaHorn 调查报告"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

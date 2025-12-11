@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对方舟编译器的简单调查">
+<meta property="og:url" content="https://imtwice.com/report-on-ark-compiler/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="1.摘要 1.1.背景 2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源 [1]。 在方舟编译器主页上，其被描述为&quot;是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件&quot; [2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。 1.2.主旨 本报告旨在搜集相关资">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image2.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image4.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image5.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image6.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image7.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image8.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image9.png">
+<meta property="og:image" content="https://imtwice.com/images/report-on-ark-compiler/image10.png">
+<meta property="article:published_time" content="2019-10-20T12:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.108Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="compiler">
+<meta property="article:tag" content="huawei">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/report-on-ark-compiler/image1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>对方舟编译器的简单调查</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/twices-anime-list/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/write-new-checker-for-clang-tidy/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-ark-compiler/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.com/report-on-ark-compiler/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/report-on-ark-compiler/&t=对方舟编译器的简单调查"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">1.摘要</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">1.1.背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E6%97%A8"><span class="toc-number">1.2.</span> <span class="toc-text">1.2.主旨</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">2.架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">2.1.整体结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#phase-%E8%AE%BE%E8%AE%A1-5"><span class="toc-number">2.2.</span> <span class="toc-text">2.2.Phase 设计 [5]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ir-%E8%AE%BE%E8%AE%A1-9"><span class="toc-number">2.3.</span> <span class="toc-text">2.3.IR 设计 [9]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gc%E8%AE%BE%E8%AE%A1"><span class="toc-number">2.4.</span> <span class="toc-text">2.4.GC设计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%B0%E7%8A%B6"><span class="toc-number">3.</span> <span class="toc-text">3.现状</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%BA%90%E6%83%85%E5%86%B5"><span class="toc-number">3.1.</span> <span class="toc-text">3.1.开源情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%B4%A8%E9%87%8F"><span class="toc-number">3.2.</span> <span class="toc-text">3.2.代码质量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%95%E6%9C%9B"><span class="toc-number">4.</span> <span class="toc-text">4.展望</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">5.对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#llvm"><span class="toc-number">5.1.</span> <span class="toc-text">5.1.LLVM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#open64-10"><span class="toc-number">5.2.</span> <span class="toc-text">5.2.Open64 [10]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#robovm"><span class="toc-number">5.3.</span> <span class="toc-text">5.3.RoboVM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mlir"><span class="toc-number">5.4.</span> <span class="toc-text">5.4.MLIR</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%80%BC%E5%BE%97%E5%8F%82%E4%B8%8E%E7%9A%84%E6%96%B9%E5%90%91"><span class="toc-number">6.</span> <span class="toc-text">6.值得参与的方向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%96%B9%E8%88%9F%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81"><span class="toc-number">6.1.</span> <span class="toc-text">6.1.对方舟编译器的形式验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9maple-ir%E7%9A%84%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">6.2.</span> <span class="toc-text">6.2.对Maple IR的静态分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#maple-ir-%E5%88%B0llvm-ir%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">6.3.</span> <span class="toc-text">6.3.Maple IR 到LLVM IR的转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%88%86%E5%B1%82%E6%AC%A1ir%E7%9A%84%E7%A0%94%E7%A9%B6"><span class="toc-number">6.4.</span> <span class="toc-text">6.4.对分层次IR的研究</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">7.</span> <span class="toc-text">7.附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">7.1.</span> <span class="toc-text">7.1.引用</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        对方舟编译器的简单调查
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-10-20T12:00:00.000Z" class="dt-published" itemprop="datePublished">2019-10-20</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/reports/">reports</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/compiler/" rel="tag">compiler</a>, <a class="p-category" href="/tags/huawei/" rel="tag">huawei</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="摘要">1.摘要</h2>
+<h3 id="背景">1.1.背景</h3>
+<p>2019年4月11日，华为在P30系列手机发布会上正式宣布推出方舟编译器。8月31日，华为方舟编译器在华为开源平台上正式开源
+[1]。</p>
+<p>在方舟编译器主页上，其被描述为"是为支持多种编程语言、多种芯片平台的联合编译、运行而设计的统一编程平台，包含编译器、工具链、运行时等关键部件"
+[2]。方舟编译器还在持续演进中，陆续将上述能力实现和开源。</p>
+<h3 id="主旨">1.2.主旨</h3>
+<p>本报告旨在搜集相关资讯、材料，整理相关内容，以对方舟编译器未来发展和其周边的可以做出进一步研究的方向进行合理推测和展望。从而可以给今后的科研选题做指导，并为下一步的调查做铺垫。</p>
+<h2 id="架构">2.架构</h2>
+<h3 id="整体结构">2.1.整体结构</h3>
+<p><img src="/images/report-on-ark-compiler/image1.png" /></p>
+<p>如上图，方舟编译器的宏观想法类似
+LLVM，会做出多种语言的前端（指编译器前端），实现从多种语言的代码翻译为
+IR（即 Maple IR），而后在中端（即 Maple
+ME）实现各种语义处理、代码优化操作，最终生成二进制文件，其与编译器运行时库文件链接生成可执行文件。
+[3]</p>
+<p><img src="/images/report-on-ark-compiler/image2.png" /></p>
+<p>实现上大体如上图，我们以处理 Java
+代码为例（实际上目前的方舟编译器仅能处理 JAVA 或其他基于 JVM
+的语言的代码），首先代码通过某种方法翻译为 Java
+字节码（方舟编译器提供了一个脚本文件 java2jar 来做这件事），而后通过
+jbc2mpl（意为 Java Bytecode to Maple
+IR，是前端的实现，目前未开源）转换为 Maple IR，而后通过 mpl2mpl （意为
+Maple IR to Maple IR，用于处理语言特性）与 mplme （意为 Maple Middle
+End，是中端的实现），这个阶段完成所有的静态分析和语义实现、优化操作。最后通过
+mplcg （意为 Maple Code
+Generator，是后端的实现，目前未开源）生成汇编代码，值得注意的是，目前的mplcg只支持arm64。
+[4]</p>
+<p>在实际的操作过程中，由于文档不全面、开源不完整以及实现上的原因，会遇到各种各样的问题与错误。当然由于方舟编译器并不是传统意义上的开源项目，或是因为目前阶段开发者并未想过会有人实际使用项目，这些问题是可以接受的。</p>
+<h3 id="phase-设计-5">2.2.Phase 设计 [5]</h3>
+<p>方舟编译器使用 Phase 的形式组织每个优化操作。这个概念与 LLVM Pass
+类似，可以把每个 Pass
+视为一个模块，这些模块可单独工作，完成一个简单的任务；也可组合起来，共同完成一个较复杂的任务
+[6]。这使得整个Maple中端的灵活性和模块化程度较高。</p>
+<p>在实现上，每个 Phase 都需要重写 run 方法，这类似于 LLVM Pass 的
+runOn... 系列方法。中端主要包含两大类 Phase，分别为maple_ipa（意为Maple
+Interprocedural Analysis）里的ModulePhase和maple_me（意为 Maple Middle
+End，编译出的可执行文件即上文中的mplme）里的MeFuncPhase（意为 Middle End
+Function Phase） [5]。具体实现出的 Phase 如下图。 [7] [8]</p>
+<p><img src="/images/report-on-ark-compiler/image4.png" /></p>
+<p>方舟编译器设计了PhaseManager负责Phase的创建、管理和运行。ModulePhase和MeFuncPhase都有对应的Manager类，即
+ModulePhaseManager和MeFuncPhaseManager。而PhaseManager类主要是通过InterleavedManager和DriverRunner来创建、管理和运行。可以看出这是一个三层管理体制。</p>
+<h3 id="ir-设计-9">2.3.IR 设计 [9]</h3>
+<p>Maple IR 是一个高阶的（high level） IR，这是和 LLVM IR
+最大的不同之处。所以其被设计成了hierarchical IR，有许多与语言特性相关的
+opcode 以及 if、while
+等在低阶IR中不可能见到的节点，也会尽最大可能的去保持源程序信息的完整性，以服务于程序的分析和优化。</p>
+<p>Maple IR
+与平台无关，是一个面向由多种编程语言编译来的程序的共同表示，在支持新语言时可能会加入新的
+opcode，既可以保留某个语言中特定的语义，而不直接向下翻译成更低阶的表示。</p>
+<p>其设计不由让人联想到 Whirl IR 的设计。Whirl
+IR把IR分为了多种不同的level，具有从高级语言到底层机器码的过程中的所有可能需要的不同level的表示形式，可以方便进行不同层级的优化。
+[10]</p>
+<p>在IR设计文档中有说明，中端在处理中会不断将hierarchical
+IR的树形结构进行拍平，并且抹除语言特有的
+opcode，将直接表示出的语义翻译为更低阶的表示形式，最终达到一种类似 flat
+IR 的低阶的（low level）IR。但目前并未在代码中找到 Maple IR
+如何记录高低阶的变化如何变为低阶 IR。</p>
+<p>Maple IR 基本类型的设计也体现了其作为高阶IR的考量，如图所示，其中的
+ptr, ref, SIMD types 以及 javascript types 体现了这一点。</p>
+<p><img src="/images/report-on-ark-compiler/image5.png" /></p>
+<h3 id="gc设计">2.4.GC设计</h3>
+<p>Java 使用GC管理、回收内存，主流的 Java VM
+实现都没有采用引用计数（RC）的方法而一般采用Tracing GC
+[11]，但方舟编译器采用了朴素的（naive）RC
+[12]，并配合一些静态检测以解决循环引用的问题，暂不清楚如何解决频繁更新引用计数所导致的效率损失问题。</p>
+<p>由于目前无法实际使用方舟编译器编译项目，我们无法得知这种改动会对运行效率产生怎样的影响，在方舟编译器可以投入使用后才可以观测到具体数据。</p>
+<p>在上文中提到，Maple 中端中会有一些
+MeFuncPhase，其中一个Phase即MeDoRCLowering就是用于在对象创建、销毁时插入引用计数操作，以实现RC语义。通过这个
+Phase，方舟编译器完成了对于 Java 对象的内存管理操作的语义实现。</p>
+<h2 id="现状">3.现状</h2>
+<h3 id="开源情况">3.1.开源情况</h3>
+<p><img src="/images/report-on-ark-compiler/image6.png" /></p>
+<p>方舟编译器并不是一个传统的开源项目，其提出了按期开源的策略，分阶段地开源，每次只开源一部分代码。如图所示，目前开源的部分包括M2M（Maple
+IR to Maple IR）的全部代码，以及中端（Maple Middle
+End）的部分代码，其中主要包括 SSA生成和RC、虚函数表语义的实现。 [13]</p>
+<p>而编译器前、后端，Java的需要在中端实现的许多其他语义如annotation、lambda表达式、泛型等以及一些静态分析和优化，Javascript等其他语言的编译在本期并未被开源。另外本次开源包括了Driver，即整个流程的管理框架，具体来说是InterleavedManager和DriverRunner，当然我认为也包括各种PhaseManager。</p>
+<p>具体到代码上，目前的mpl2mpl 和 mplme
+部分的开源代码包括maple_driver、maple_ipa、maple_ir、maple_me、mpl2mpl（描述如下表）已经可以足够支撑其构建出中端的可执行文件，而其他可执行文件皆直接被放在src/bin目录中，未提供源代码。</p>
+<table>
+<colgroup>
+<col style="width: 67%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>目录名（在 src/ 下）</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mpl_phase</td>
+<td>Phase基本框架的代码（只有头文件和库文件，未开源）</td>
+</tr>
+<tr class="even">
+<td>maple_driver</td>
+<td>包含了驱动整个流程运行的代码，也是程序的入口点</td>
+</tr>
+<tr class="odd">
+<td>maple_ipa</td>
+<td>InterleavedManager和ModulePhaseManager的相关代码</td>
+</tr>
+<tr class="even">
+<td>maple_ir</td>
+<td>针对Maple IR的基本操作的相关代码</td>
+</tr>
+<tr class="odd">
+<td>maple_me</td>
+<td>有关MeFuncPhase类别的Phase的框架及其具体内容</td>
+</tr>
+<tr class="even">
+<td>mpl2mpl</td>
+<td>一些从Maple IR到Maple IR的转换，为后续的ME做准备</td>
+</tr>
+</tbody>
+</table>
+<h3 id="代码质量">3.2.代码质量</h3>
+<p>在方舟编译器开源之初，其代码质量曾引起广泛的讨论。可以看到其中一些代码并未遵循其文档中的代码规范，以及一些明显错误的C++用法，被知乎用户在社区中指出。
+[14]</p>
+<p>但华为使用了Coverity作为静态分析工具，其代码质量是有一定保证的。源伞科技曾使用其商业级静态分析器Pinpoint扫描其最新代码（13e1bc6），发现了一些潜在的Bug，但得到了整体代码质量良好的结论。
+[15]</p>
+<h2 id="展望">4.展望</h2>
+<p>虽然国际上有许多成熟、优秀的编译器项目（如
+LLVM等），以及一些正在开发的IR（如
+MLIR等），并且这些项目都有国人参与，但方舟编译器确实代表了国内公司的研发水平。</p>
+<p>在接下来的开源计划中，方舟编译器把前端、后端、编译优化，完整支持Java程序编译、JavaScript语言应用的编译提上了日程。在实现这些开源计划后，方舟编译器才会走出孵化期，成为一个正常意义上的、健壮的开源项目。
+[16]</p>
+<p>在项目的README中，开发者总结了四个技术特点，指出方舟编译器能够将不同语言代码编译成一套可执行文件，在运行环境中高效执行：
+[16]</p>
+<ul>
+<li>支持多语言联合优化、消除跨语言调用开销；</li>
+<li>更轻量的语言运行时；</li>
+<li>软硬协同充分发挥硬件能效；</li>
+<li>支持多样化的终端设备平台。</li>
+</ul>
+<p>当然，这都是在完成孵化期后才能看到的效果。</p>
+<h2 id="对比">5.对比</h2>
+<h3 id="llvm">5.1.LLVM</h3>
+<p>上文中已经提及了部分与 LLVM
+的对比，包括Phase、IR的特点上的比较。LLVM作为至今为止最成熟、使用最广泛的编译器项目，有许多设计上的优点值得被借鉴。</p>
+<p>值得注意的是，Maple IR与LLVM IR在目的上有着本质的区别，LLVM IR
+作为一种底层IR不需要任何语言特性相关的 opcode，这使得LLVM
+IR在设计上（传统的基于CFG的三地址SSA表示形式）较为整洁，且成熟稳定。Maple
+IR
+作为上层IR会在支持新的语言时做较多改动，且需要较多的特定语言相关的表达。</p>
+<p>MAPLE IR是采用的是类似C语言的形式，将IR分为声明语句（declaration
+statements）和执行语句（executable
+statements）两部分，前者表达符号表信息，后者表达要执行的具体程序代码。而LLVM
+IR当然更类似于汇编的形式。</p>
+<p>在整体结构上，二者都有module这个概念，而且其内涵也是一致的，都是对应着一个CU（Compilation
+Unit，编译单元）。在module之下都是一些全局的声明和函数声明，这部分是一个module的主要内容。CU内的结构如图所示：
+[9]</p>
+<p><img src="/images/report-on-ark-compiler/image7.png" /></p>
+<p>而LLVM的整体结构的布局可以用如下图片表示： [17]</p>
+<p><img src="/images/report-on-ark-compiler/image8.png" /></p>
+<p>可以看到虽然有许多差别，但是基本的结构并没有非常大的不同。Maple IR
+在处理的过程中也会不断的进行层次下降操作，最终应该被规约为与底层的IR相类似的结构。</p>
+<h3 id="open64-10">5.2.Open64 [10]</h3>
+<p>如果说 LLVM 与 Maple
+在IR上有出发点的不同，那么用Open64做对比能从更近距离的角度观察Maple
+IR。因为Open64的Whirl IR与Maple IR 在设计思路上更加接近。</p>
+<p>在Whirl
+IR中，IR被分为了多种不同的level，包括从高级语言到底层机器码的过程中的所有可能需要的不同level的表示形式，可以方便进行不同层级的优化。high
+level的IR可以进行和语言特性相关的优化，low
+level进行和硬件特性相关的优化。在其设计文档中可以找到IR处理过程的流程图。</p>
+<p><img src="/images/report-on-ark-compiler/image9.png" /></p>
+<p>如图，每一个转换过程都会将更high level的IR翻译为lower
+level的IR。这与我们之前对Maple
+IR一致。举一个简单的例子，像if、while这种high
+level、层级化的控制流opcode，经过Phase的转换、优化后，应该会变成goto、brfalse、brtrue等扁平化的控制流opcode。当然，MAPLE
+IR虽然也称自己为多层IR，但是缺乏类似的文档和代码展示其多层IR的具体情况和对应关系。</p>
+<p>和Whirl IR不太一样的地方，就是Maple
+IR中有一些直接和前端语言特性强相关的opcode，比如Javascript的数据类型、opcode中的Java
+Call以及Java Class and Interface Declaration等。这个做法是否会引起 IR
+的复杂性随前端语言增多而暴增是一个值得讨论的问题。</p>
+<h3 id="robovm">5.3.RoboVM</h3>
+<p>RoboVM是一个将 Java Bytecode 编译为 LLVM IR
+的项目，有趣的是其前端使用了Soot来做静态分析以帮助转换工作，其做的工作与目前的Maple
+IR在某种程度上是类似的，遗憾的是其原本的开发者已经抛弃了这个项目，目前由MobiVM维护着一个fork（指
+fork 了原 Git repo）。 [18]</p>
+<p>Maple 与 RoboVM最大的不同点其实与LLVM IR与Maple
+IR的不同点是一致的，都是IR的出发点不同的区别。RoboVM可以在宏观意义上认为是LLVM的一个前端，其工作量小于方舟编译器。</p>
+<p>在Maple IR的设计文档中提到，其有配套的Maple VM，Maple IR可以作为Maple
+VM的输入，在Maple
+VM上执行，而不需要进一步翻译成针对某个目标处理器的机器指令。这其实比RoboVM更接近JVM的工作。</p>
+<h3 id="mlir">5.4.MLIR</h3>
+<p>LLVM的作者Chris Lattner 加入Google
+Brain之后为Tensorflow提出了名为MLIR（Multi-Level
+IR）的项目，其接受多种语言作为输入，而将LLVM IR作为输出。这一想法与Maple
+IR在IR分层上不谋而合。 [19]</p>
+<p>在一次演讲（EuroLLVM Developers' Meeting）中，指出了一个比 LLVM IR
+更高阶的IR所带来的好处，并声称Clang需要一个更高阶的IR（称之为CIL
+IR）以更好地进行静态分析工作，就像 Rust在MIR中完成borrow
+checker的所有分析工作那样。 [20]</p>
+<p>其在演讲幻灯片中用图片展示了这一概念：</p>
+<p><img src="/images/report-on-ark-compiler/image10.png" /></p>
+<p>当然，与MLIR不同的是，方舟编译器打算自己完成后端，而不是借助LLVM，这使得Maple的工作量和需要的时间更多。</p>
+<h2 id="值得参与的方向">6.值得参与的方向</h2>
+<h3 id="对方舟编译器的形式验证">6.1.对方舟编译器的形式验证</h3>
+<p>CompCert
+作为使用形式验证技术构建出的可为PowerPC，ARM，RISC-V和x86处理器生成高效代码的C语言（C99）编译器在众多测试面前屹立不倒，证明了使用形式验证保证编译器可信的可行性。</p>
+<p>方舟编译器虽然使用C++（指 C++
+14）实现，但采用了模块化程度较高的Phase模式，很容易从中拿出某个Phase进行验证而不需要担心其他方面的影响，比如可以对DoRCLowering这个Phase进行验证，以确保实现了正确的RC语义。</p>
+<h3 id="对maple-ir的静态分析">6.2.对Maple IR的静态分析</h3>
+<p>LLVM/Clang
+拥有ClangStaticAnalysis和clang-tidy两大静态分析引擎，可以胜任对C/C++代码的各种分析工作，如符号分析等。</p>
+<p>Maple
+IR在理论上更有优势，因为ClangStaticAnalysis在AST层面分析会遇到许多冗余信息，从而做更多的判断，而在高阶IR层面可以在减少不必要的冗余信息的基础上保留静态分析所需要的全部信息，从而使得静态分析工作被简化。</p>
+<p>目前Maple IR的静态分析工作非常不完备，故可以从这里着手参与Maple
+IR的工作。</p>
+<h3 id="maple-ir-到llvm-ir的转换">6.3.Maple IR 到LLVM IR的转换</h3>
+<p>目前未开源的 mplcg 仅支持从Maple
+IR生成arm64机器代码，但如果可以直接生成LLVM IR，则可以支持多种架构，使得
+Maple
+IR的应用范围扩大，且可以利用起LLVM，使得后端的稳定性极大的增强。</p>
+<h3 id="对分层次ir的研究">6.4.对分层次IR的研究</h3>
+<p>从Whirl IR，到Maple
+IR和MLIR，分层次IR比起传统的单层或是底层IR有着许多优势，而如何更好的设计分层次IR成为了一个引人注目的问题。系统地研究分层次IR可能会得到更好的结果以推动工业级IR的设计。</p>
+<h2 id="附录">7.附录</h2>
+<h3 id="引用">7.1.引用</h3>
+<p>[1] CNMO, "华为正式宣布 方舟编译器将于8月31日正式开源," 2019. [联机].
+Available:
+https://tech.sina.com.cn/mobile/n/n/2019-08-30/doc-iicezzrq2140953.shtml.</p>
+<p>[2] 华为, "方舟编译器 官方网站," 华为, 2019. [联机]. Available:
+https://www.openarkcompiler.cn/.</p>
+<p>[3] 华为, "方舟编译器 架构设计," 2019. [联机]. Available:
+https://www.openarkcompiler.cn/document/frameworkDesgin.</p>
+<p>[4] 华为, "方舟编译器 开源代码 官方主仓库," 2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler.</p>
+<p>[5] 华为, "方舟编译器 Phase 设计介绍," 2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Compiler_Phase_Description.md.</p>
+<p>[6] LLVM, "Writing an LLVM Pass - LLVM 10 documentation," [联机].
+Available: http://llvm.org/docs/WritingAnLLVMPass.html.</p>
+<p>[7] 华为, "方舟编译器 开源代码
+src/maple_ipa/include/module_phases.def," 2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_ipa/include/module_phases.def.</p>
+<p>[8] 华为, "方舟编译器 开源代码 src/maple_me/include/me_phases.def,"
+2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/src/maple_me/include/me_phases.def.</p>
+<p>[9] 华为, "Maple IR Design Document," 2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/MapleIRDesign.md.</p>
+<p>[10] Open64, "Open64 Compiler Whirl Intermediate Representation," 3 8
+2007. [联机]. Available: https://www.mcs.anl.gov/OpenAD/open64A.pdf.</p>
+<p>[11] RednaxelaFX,
+"垃圾回收机制中，引用计数法是如何维护所有对象引用的？," [联机].
+Available: https://www.zhihu.com/question/21539353/answer/18596488.</p>
+<p>[12] 华为, "朴素版 RC 操作插入原理," 2018. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/doc/Naive_RC_Insertion_Description.md.</p>
+<p>[13] 华为, "方舟编译器 官方网站 FAQ," 2019. [联机]. Available:
+https://www.openarkcompiler.cn/document/FAQ.</p>
+<p>[14] bsdelf, "程序员们如何看待华为方舟编译器首次开源部分代码？,"
+2019. [联机]. Available:
+https://www.zhihu.com/question/343494051/answer/809494133.</p>
+<p>[15] 源伞科技, "华为方舟的爱之体检," 2019. [联机]. Available:
+https://www.sourcebrella.com/blog/huawei-ark-compiler-test/.</p>
+<p>[16] 华为, "方舟编译器 开源代码 Readme.md," 2019. [联机]. Available:
+https://gitee.com/harmonyos/OpenArkCompiler/blob/master/Readme.md.</p>
+<p>[17] V. Bridgers, "LLVM IR Tutorial - Phis, geps and other things, oh
+my!," [联机]. Available:
+http://llvm.org/devmtg/2019-04/slides/Tutorial-Bridgers-LLVM_IR_tutorial.pdf.</p>
+<p>[18] MobiVM, "MobiDevelop's RoboVM Fork," [联机]. Available:
+http://robovm.mobidevelop.com/.</p>
+<p>[19] Google, "Multi-Level Intermediate Representation - GitHub Repo,"
+2019. [联机]. Available: https://github.com/tensorflow/mlir.</p>
+<p>[20] T. Shpeisman 和 C. Lattner, "MLIR: Multi-Level Intermediate
+Representation for Compiler Infrastructure," 2019. [联机]. Available:
+https://ai.google/research/pubs/pub48035.pdf.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">1.摘要</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">1.1.背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E6%97%A8"><span class="toc-number">1.2.</span> <span class="toc-text">1.2.主旨</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">2.架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">2.1.整体结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#phase-%E8%AE%BE%E8%AE%A1-5"><span class="toc-number">2.2.</span> <span class="toc-text">2.2.Phase 设计 [5]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ir-%E8%AE%BE%E8%AE%A1-9"><span class="toc-number">2.3.</span> <span class="toc-text">2.3.IR 设计 [9]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gc%E8%AE%BE%E8%AE%A1"><span class="toc-number">2.4.</span> <span class="toc-text">2.4.GC设计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%B0%E7%8A%B6"><span class="toc-number">3.</span> <span class="toc-text">3.现状</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%BA%90%E6%83%85%E5%86%B5"><span class="toc-number">3.1.</span> <span class="toc-text">3.1.开源情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%B4%A8%E9%87%8F"><span class="toc-number">3.2.</span> <span class="toc-text">3.2.代码质量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%95%E6%9C%9B"><span class="toc-number">4.</span> <span class="toc-text">4.展望</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">5.对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#llvm"><span class="toc-number">5.1.</span> <span class="toc-text">5.1.LLVM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#open64-10"><span class="toc-number">5.2.</span> <span class="toc-text">5.2.Open64 [10]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#robovm"><span class="toc-number">5.3.</span> <span class="toc-text">5.3.RoboVM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mlir"><span class="toc-number">5.4.</span> <span class="toc-text">5.4.MLIR</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%80%BC%E5%BE%97%E5%8F%82%E4%B8%8E%E7%9A%84%E6%96%B9%E5%90%91"><span class="toc-number">6.</span> <span class="toc-text">6.值得参与的方向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%96%B9%E8%88%9F%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81"><span class="toc-number">6.1.</span> <span class="toc-text">6.1.对方舟编译器的形式验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9maple-ir%E7%9A%84%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">6.2.</span> <span class="toc-text">6.2.对Maple IR的静态分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#maple-ir-%E5%88%B0llvm-ir%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">6.3.</span> <span class="toc-text">6.3.Maple IR 到LLVM IR的转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%88%86%E5%B1%82%E6%AC%A1ir%E7%9A%84%E7%A0%94%E7%A9%B6"><span class="toc-number">6.4.</span> <span class="toc-text">6.4.对分层次IR的研究</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">7.</span> <span class="toc-text">7.附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">7.1.</span> <span class="toc-text">7.1.引用</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/report-on-ark-compiler/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/report-on-ark-compiler/&text=对方舟编译器的简单调查"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/report-on-ark-compiler/&is_video=false&description=对方舟编译器的简单调查"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=对方舟编译器的简单调查&body=Check out this article: https://imtwice.com/report-on-ark-compiler/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/report-on-ark-compiler/&title=对方舟编译器的简单调查"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/report-on-ark-compiler/&name=对方舟编译器的简单调查&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/report-on-ark-compiler/&t=对方舟编译器的简单调查"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

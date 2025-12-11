@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 C++ 需要静态（编译期）反射 并且 WG21 正在为这一点而努力。具体请看 N4818（Reflection TS），以及可以吊打 N4818 的 P1717（extended P0712，最近很长时间没关注了，难道 Andrew Sutton 不想跟 Herb Sutter 一起玩儿了？），让我们感受一下里面的第一个例子： 1234567">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 需要反射吗">
+<meta property="og:url" content="https://imtwice.com/does-cpp-need-reflection/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 C++ 需要静态（编译期）反射 并且 WG21 正在为这一点而努力。具体请看 N4818（Reflection TS），以及可以吊打 N4818 的 P1717（extended P0712，最近很长时间没关注了，难道 Andrew Sutton 不想跟 Herb Sutter 一起玩儿了？），让我们感受一下里面的第一个例子： 1234567">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+<meta property="article:published_time" content="2019-06-28T14:45:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.107Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="c++ standard">
+<meta property="article:tag" content="reflection">
+<meta property="article:tag" content="c++ template">
+<meta property="article:tag" content="zhihu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>C++ 需要反射吗</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/write-new-checker-for-clang-tidy/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/cpp-fall-talk/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/does-cpp-need-reflection/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/does-cpp-need-reflection/&text=C++ 需要反射吗"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/does-cpp-need-reflection/&is_video=false&description=C++ 需要反射吗"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 需要反射吗&body=Check out this article: https://imtwice.com/does-cpp-need-reflection/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/does-cpp-need-reflection/&name=C++ 需要反射吗&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/does-cpp-need-reflection/&t=C++ 需要反射吗"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-%E9%9C%80%E8%A6%81%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91%E6%9C%9F%E5%8F%8D%E5%B0%84"><span class="toc-number">2.</span> <span class="toc-text">C++ 需要静态（编译期）反射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-%E6%A0%87%E5%87%86%E4%B8%8D%E9%9C%80%E8%A6%81%E5%8A%A8%E6%80%81%E8%BF%90%E8%A1%8C%E6%9C%9F%E5%8F%8D%E5%B0%84"><span class="toc-number">3.</span> <span class="toc-text">C++
+标准不需要动态（运行期）反射</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        C++ 需要反射吗
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-06-28T14:45:00.000Z" class="dt-published" itemprop="datePublished">2019-06-28</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/daily/">daily</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/c/" rel="tag">c++</a>, <a class="p-category" href="/tags/c-standard/" rel="tag">c++ standard</a>, <a class="p-category" href="/tags/c-template/" rel="tag">c++ template</a>, <a class="p-category" href="/tags/reflection/" rel="tag">reflection</a>, <a class="p-category" href="/tags/zhihu/" rel="tag">zhihu</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="注意">注意</h2>
+<p><img src="/images/zhihu/zhihu.jpg" alt="zhihu.jpg" />
+本文旨在整理知乎上的回答，原答案链接请<a
+target="_blank" rel="noopener" href="https://www.zhihu.com/question/268188946/answer/334037634">戳这里</a>。</p>
+<h2 id="c-需要静态编译期反射">C++ 需要静态（编译期）反射</h2>
+<p>并且 WG21 正在为这一点而努力。具体请看 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2019/n4818.pdf">N4818</a>（Reflection
+TS），以及可以吊打 N4818 的 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2019/p1717r0.pdf">P1717</a>（extended
+P0712，最近很长时间没关注了，难道 Andrew Sutton 不想跟 Herb Sutter
+一起玩儿了？），让我们感受一下里面的第一个例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Types&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">tuple</span> &#123;</span><br><span class="line">    <span class="keyword">consteval</span> &#123;</span><br><span class="line">        <span class="type">int</span> counter = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>... (meta::info type : <span class="built_in">reflexpr</span>(Types)) &#123;</span><br><span class="line">            <span class="keyword">auto</span> fragment = __fragment <span class="keyword">struct</span> &#123;</span><br><span class="line">                <span class="built_in">typename</span>(type) <span class="built_in">unqualid</span>(<span class="string">&quot;element_&quot;</span>, counter);</span><br><span class="line">            &#125;;</span><br><span class="line">            -&gt; fragment;</span><br><span class="line">            ++counter;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">tuple&lt;<span class="type">bool</span>, <span class="type">char</span>, <span class="type">int</span>&gt; tup;</span><br></pre></td></tr></table></figure>
+<p>在 tuple 被特化时大概将生成以下的代码： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Types&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">tuple</span> &#123;</span><br><span class="line">    <span class="type">bool</span> element0;</span><br><span class="line">    <span class="type">char</span> element1;</span><br><span class="line">    <span class="type">int</span> element2;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+完全可以吊打传统的 tuple
+实现方式（当然这只是个很不完备的小例子），包括恐怖的递归继承实现方式和比前者好一点的多继承实现方式。实际上我认为这可以一定程度上使得
+C++
+远离许多奇技淫巧，可以让大家免于记忆一大堆由于语言设施不完备做出妥协而流传于世的
+idioms 的痛苦。</p>
+<h2 id="c-标准不需要动态运行期反射">C++
+标准不需要动态（运行期）反射</h2>
+<p>或者说，我认为一旦有了静态反射，动态反射就完全可以由社区提供，比如 <a
+target="_blank" rel="noopener" href="https://github.com/rttrorg/rttr">RTTR</a>，当然我更倾向于认为大部分需求都能用静态反射解决。</p>
+<p>所有说可以用 C++
+宏实现反射的人都是不负责任，宏的部分功能应该被静态反射淘汰，这种极其落后的语言设施应该被消灭掉。</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-%E9%9C%80%E8%A6%81%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91%E6%9C%9F%E5%8F%8D%E5%B0%84"><span class="toc-number">2.</span> <span class="toc-text">C++ 需要静态（编译期）反射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-%E6%A0%87%E5%87%86%E4%B8%8D%E9%9C%80%E8%A6%81%E5%8A%A8%E6%80%81%E8%BF%90%E8%A1%8C%E6%9C%9F%E5%8F%8D%E5%B0%84"><span class="toc-number">3.</span> <span class="toc-text">C++
+标准不需要动态（运行期）反射</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/does-cpp-need-reflection/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/does-cpp-need-reflection/&text=C++ 需要反射吗"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/does-cpp-need-reflection/&is_video=false&description=C++ 需要反射吗"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 需要反射吗&body=Check out this article: https://imtwice.com/does-cpp-need-reflection/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/does-cpp-need-reflection/&title=C++ 需要反射吗"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/does-cpp-need-reflection/&name=C++ 需要反射吗&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/does-cpp-need-reflection/&t=C++ 需要反射吗"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

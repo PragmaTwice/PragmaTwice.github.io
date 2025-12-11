@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 对 std::basic_string 的理解 std::string 的设计思想和 STL 以及整个 Std Librarys 是一致的，不以运行效率为代价做任何易用性上的改变，对于一些非常复杂或者没有统一方案的东西宁可不加入，保持整体上的洁净。 CppRef 上这样描述 std::basic_string :  The class is">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 自己写一个更好的 string 需要什么步骤">
+<meta property="og:url" content="https://imtwice.com/how-to-write-a-better-string-in-cpp/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="注意  本文旨在整理知乎上的回答，原答案链接请戳这里。 对 std::basic_string 的理解 std::string 的设计思想和 STL 以及整个 Std Librarys 是一致的，不以运行效率为代价做任何易用性上的改变，对于一些非常复杂或者没有统一方案的东西宁可不加入，保持整体上的洁净。 CppRef 上这样描述 std::basic_string :  The class is">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+<meta property="article:published_time" content="2017-09-12T12:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.107Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="zhihu">
+<meta property="article:tag" content="string">
+<meta property="article:tag" content="STL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/zhihu/zhihu.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>C++ 自己写一个更好的 string 需要什么步骤</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/implementation-of-parser-based-on-parser-combinator/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/how-to-write-a-better-string-in-cpp/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&text=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&is_video=false&description=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 自己写一个更好的 string 需要什么步骤&body=Check out this article: https://imtwice.com/how-to-write-a-better-string-in-cpp/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&name=C++ 自己写一个更好的 string 需要什么步骤&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/how-to-write-a-better-string-in-cpp/&t=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9-stdbasic_string-%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">对 std::basic_string 的理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E5%88%A9-text_view"><span class="toc-number">3.</span> <span class="toc-text">安利 text_view</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        C++ 自己写一个更好的 string 需要什么步骤
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2017-09-12T12:00:00.000Z" class="dt-published" itemprop="datePublished">2017-09-12</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/daily/">daily</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/STL/" rel="tag">STL</a>, <a class="p-category" href="/tags/c/" rel="tag">c++</a>, <a class="p-category" href="/tags/string/" rel="tag">string</a>, <a class="p-category" href="/tags/zhihu/" rel="tag">zhihu</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="注意">注意</h2>
+<p><img src="/images/zhihu/zhihu.jpg" alt="zhihu" />
+本文旨在整理知乎上的回答，原答案链接请<a
+target="_blank" rel="noopener" href="https://www.zhihu.com/question/64949799/answer/228337291">戳这里</a>。</p>
+<h2 id="对-stdbasic_string-的理解">对 std::basic_string 的理解</h2>
+<p><code>std::string</code> 的设计思想和 STL 以及整个 Std Librarys
+是一致的，不以运行效率为代价做任何易用性上的改变，对于一些非常复杂或者没有统一方案的东西宁可不加入，保持整体上的洁净。</p>
+<p><a target="_blank" rel="noopener" href="https://en.cppreference.com/w/">CppRef</a> 上这样描述
+<code>std::basic_string</code> :</p>
+<blockquote>
+<p>The class is dependent neither on the character type nor on the
+nature of operations on that type.</p>
+</blockquote>
+<p>但是这样的结果是大家都以其他语言的 string 去喷
+<code>std::string</code>，就是因为都起了相同的名字——叫 string。</p>
+<h2 id="安利-text_view">安利 text_view</h2>
+<p>那么大家心目中的 string 在 c++ 里是怎么样的呢 ， <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0244r2.html"><code>text_view</code></a>
+提案里这样说的：</p>
+<blockquote>
+<p>C++11 added support for new character types [N2249] and Unicode
+string literals [N2442], but neither C++11, nor more recent standards
+have provided means of efficiently and conveniently enumerating code
+points in Unicode or legacy encodings. While it is possible to implement
+such enumeration using interfaces provided in the standard <locale> and
+<codecvt> libraries, doing so is awkward, requires that text be provided
+as pointers to contiguous memory, and inefficent due to virtual function
+call overhead.</p>
+</blockquote>
+<p><code>text_view</code> 是怎么样的呢：</p>
+<blockquote>
+<p>(text_view) provides iterator and range based interfaces for encoding
+and decoding strings in a variety of character encodings. The interface
+is intended to support all modern and legacy character encodings, though
+implementations are expected to only provide support for a limited set
+of encodings.</p>
+</blockquote>
+<blockquote>
+<p>(text_view) intended to solve the above (shortage in processing
+strings with <codecvt>) issues while also providing a modern interface
+that is intuitive to use and can be used with other standard provided
+facilities; in particular, the C++ standard <algorithm> library.</p>
+</blockquote>
+<p>那么要在C++中写一个“更好的“的 string ，应该就是写一个切合大家心中对
+string 的所有易用性上的幻想的 string，大概可以参考 <a
+target="_blank" rel="noopener" href="https://github.com/tahonermann/text_view"><code>text_view</code>
+提案附带的实现</a>，以及 <a target="_blank" rel="noopener" href="http://doc.qt.io/qt-5/qstring.html">Qt
+/ <code>QString</code></a> , 既然要易用，配套个正则也是加分项吧（</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">1.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9-stdbasic_string-%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">对 std::basic_string 的理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E5%88%A9-text_view"><span class="toc-number">3.</span> <span class="toc-text">安利 text_view</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/how-to-write-a-better-string-in-cpp/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&text=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&is_video=false&description=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 自己写一个更好的 string 需要什么步骤&body=Check out this article: https://imtwice.com/how-to-write-a-better-string-in-cpp/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&title=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/how-to-write-a-better-string-in-cpp/&name=C++ 自己写一个更好的 string 需要什么步骤&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/how-to-write-a-better-string-in-cpp/&t=C++ 自己写一个更好的 string 需要什么步骤"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

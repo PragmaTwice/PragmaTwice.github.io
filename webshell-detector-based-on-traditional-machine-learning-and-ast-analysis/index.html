@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为  结构特征 词频特征  将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于传统机器学习技术及 AST 分析技术的 Webshell Detector">
+<meta property="og:url" content="https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="poison-shell-webshell-backdoor  总述 AST, 抽象语法树 上所包含的、可关联到代码特征的构成，可简单抽象分割为  结构特征 词频特征  将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：  结构特征 \(\to\) SVM, 支持向量机 词频特征 \(\to\) naive Bayes classifiers, 朴素贝叶斯分类器  一个非常有趣，或">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-10-01T13:50:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.108Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="webshell">
+<meta property="article:tag" content="webshell detector">
+<meta property="article:tag" content="machine learning">
+<meta property="article:tag" content="AST">
+<meta property="article:tag" content="program analysis">
+<meta property="article:tag" content="SVM">
+<meta property="article:tag" content="naive bayes">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>基于传统机器学习技术及 AST 分析技术的 Webshell Detector</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/information-of-past-presentations/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/how-to-map-string-literal-to-type-in-cpp/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&text=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&is_video=false&description=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于传统机器学习技术及 AST 分析技术的 Webshell Detector&body=Check out this article: https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&name=基于传统机器学习技术及 AST 分析技术的 Webshell Detector&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&t=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">总述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ast-%E7%BB%93%E6%9E%84%E7%89%B9%E5%BE%81%E7%9A%84%E6%8F%90%E5%8F%96"><span class="toc-number">2.</span> <span class="toc-text">AST 结构特征的提取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ast-%E8%AF%8D%E9%A2%91%E7%89%B9%E5%BE%81%E7%9A%84%E6%8F%90%E5%8F%96"><span class="toc-number">3.</span> <span class="toc-text">AST 词频特征的提取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">4.</span> <span class="toc-text">附录</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        基于传统机器学习技术及 AST 分析技术的 Webshell Detector
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-10-01T13:50:00.000Z" class="dt-published" itemprop="datePublished">2018-10-01</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/projects/">projects</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/AST/" rel="tag">AST</a>, <a class="p-category" href="/tags/SVM/" rel="tag">SVM</a>, <a class="p-category" href="/tags/machine-learning/" rel="tag">machine learning</a>, <a class="p-category" href="/tags/naive-bayes/" rel="tag">naive bayes</a>, <a class="p-category" href="/tags/program-analysis/" rel="tag">program analysis</a>, <a class="p-category" href="/tags/webshell/" rel="tag">webshell</a>, <a class="p-category" href="/tags/webshell-detector/" rel="tag">webshell detector</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <figure>
+<img
+src="/images/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/poison-shell-webshell-backdoor.jpg"
+alt="poison-shell-webshell-backdoor" />
+<figcaption
+aria-hidden="true">poison-shell-webshell-backdoor</figcaption>
+</figure>
+<h2 id="总述">总述</h2>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">AST,
+抽象语法树</a> 上所包含的、可关联到代码特征的构成，可简单抽象分割为</p>
+<ul>
+<li>结构特征</li>
+<li>词频特征</li>
+</ul>
+<p>将相应的特征提取出后，可将已有的样本选用成熟的分类器进行训练：</p>
+<ul>
+<li>结构特征 <span class="math inline">\(\to\)</span> <a
+target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Support_vector_machine">SVM,
+支持向量机</a></li>
+<li>词频特征 <span class="math inline">\(\to\)</span> <a
+target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Naive_Bayes_classifier">naive Bayes
+classifiers, 朴素贝叶斯分类器</a></li>
+</ul>
+<p>一个非常有趣，或说是非常重要的任务，既是从 AST
+上提取相应的特征，并构造出特征向量，以至直接导入相应分类器进行训练</p>
+<h2 id="ast-结构特征的提取">AST 结构特征的提取</h2>
+<p>因 AST 结构是树状的，我们需要对其进行 “拍平” 操作。 设有一颗 <span
+class="math inline">\(AST\)</span>，其全部 <span
+class="math inline">\(n\)</span> 个节点组成的集合为 <span
+class="math display">\[nodes(AST) = \{node_i | i \in [1,n] \cap
+\mathbb{N} \}\]</span> 设有节点 <span
+class="math inline">\(node_m,node_n\)</span>，节点 <span
+class="math inline">\(node_m\)</span> 的父节点为 <span
+class="math inline">\(node_n\)</span> 的关系表示为 <span
+class="math display">\[node_n \mathbb{P}_{AST} node_m\quad or\quad
+node_m \mathbb{C}_{AST} node_n\]</span> 设有节点 <span
+class="math inline">\(node_i\)</span>， 其子节点组成的集合可表示为 <span
+class="math display">\[children_{AST}(node_i) = \{ node_k | node_k \in
+nodes(AST) \land node_k\mathbb{C}_{AST}node_i \}\]</span>
+则对于每一个节点 <span
+class="math inline">\(node_i\)</span>，都可以得到一个父子元组 <span
+class="math display">\[self\&amp;children_{AST}(node_i) = (node_i,
+node_{j1},..., node_{jn})\]</span> 其中 <span
+class="math display">\[node_{j1},...,node_{jn} \in
+children_{AST}(node_i) \land n = |children_{AST}(node_i)|\]</span>
+故对于这颗 <span class="math inline">\(AST\)</span> 有 <span
+class="math display">\[self\&amp;children_{AST} =
+\{self\&amp;children_{AST}(node_i) | node_i \in nodes(AST)\}\]</span>
+对于每一个节点 <span
+class="math inline">\(node_i\)</span>，都有一个整数值 <span
+class="math inline">\(kind\)</span> 可以指代这个节点的类型<span
+class="math inline">\(^1\)</span>，我们表示为 <span
+class="math display">\[kind(node_i)\]</span> 故对于每一个 <span
+class="math inline">\(self\&amp;children_{AST}(node_i)\)</span>
+都可将其中所有 <span class="math inline">\(node_i\)</span> 替换为 <span
+class="math inline">\(kind(node_i)\)</span> 从而得到一整数集<span
+class="math inline">\(^2\)</span> <span
+class="math display">\[self\&amp;children_{AST}^{kind}(node_i) =
+(kind(node_1),...,kind(node_n))\]</span> 其中 <span
+class="math display">\[node_1,...,node_n =
+self\&amp;children_{AST}(node_i)[1],...,self\&amp;children_{AST}(node_i)[n]\]</span>
+同样的，对于这颗 <span class="math inline">\(AST\)</span> 有 <span
+class="math display">\[self\&amp;children_{AST}^{kind} =
+\{self\&amp;children_{AST}^{kind}(node_i) | node_i \in
+nodes(AST)\}\]</span> 出于实践上的考量<span
+class="math inline">\(^3\)</span>，对于任意的 <span
+class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span>，都可取一哈希值作为此元组的代替标记，记为
+<span
+class="math display">\[hash(self\&amp;children_{AST}^{kind}(node_i))\]</span>
+则对于这颗 <span class="math inline">\(AST\)</span>，有对于每个 <span
+class="math inline">\(node_i\)</span> 所构成的元组的哈希值 <span
+class="math inline">\(hash(self\&amp;children_{AST}^{kind}(node_i))\)</span>
+所构成的元组 <span class="math display">\[hash(AST) =
+(hash(self\&amp;children_{AST}^{kind}(node_1)),...,hash(self\&amp;children_{AST}^{kind}(node_n)))\]</span>
+其中 <span class="math display">\[node_{1},...,node_{n} \in nodes(AST)
+\land n = |nodes(AST)|\]</span> 设元组 <span
+class="math inline">\(A\)</span> 中与 <span
+class="math inline">\(a\)</span> 值相同的元素的个数为 <span
+class="math inline">\(i\)</span>，记作 <span
+class="math display">\[count_A(a) = i\]</span> 构建这样一个元组 <span
+class="math inline">\(X\)</span>，使得 <span
+class="math display">\[X[hash(self\&amp;children_{AST}^{kind}(node_i))]
+=
+count_{hash(AST)}(hash(self\&amp;children_{AST}^{kind}(node_i)))\]</span>
+则 <span class="math inline">\(X\)</span> 可作为这颗 <span
+class="math inline">\(AST\)</span> 的特征向量导入 SVM 分类器 设 webshell
+样本代码的 <span class="math inline">\(AST\)</span> 组成的集合记为 <span
+class="math inline">\(\mathbb{W}\)</span>，则有 <span
+class="math display">\[
+isWebshell(AST_x) = \begin{cases}
+0&amp; AST_x \notin \mathbb{W}\\
+1&amp; AST_x \in \mathbb{W}
+\end{cases}
+\]</span> 即对于 <span class="math inline">\(n\)</span> 棵 <span
+class="math inline">\(AST_1,...AST_n\)</span>，有特征矩阵 <span
+class="math inline">\(Xs\)</span> 与期望向量 <span
+class="math inline">\(Y\)</span> <span class="math display">\[
+\left\{
+\begin{aligned}
+Xs &amp; = [ X_{AST_1},...,X_{AST_n} ] \\
+Ys &amp; = [ isWebshell(AST_1),...,isWebshell(AST_n) ]
+\end{aligned}
+\right.
+\]</span></p>
+<h2 id="ast-词频特征的提取">AST 词频特征的提取</h2>
+<p>在以纯文本的形式分析代码时，由于没有 <a
+target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Lexical_analysis#Tokenization">Tokenizer,
+分词器</a>，很难得到有较大意义的“词”，而在 <span
+class="math inline">\(AST\)</span> 层面可以依据 <span
+class="math inline">\(kind\)</span> 值得到有特征意义的“词”<span
+class="math inline">\(^4\)</span> 遍历整颗 <span
+class="math inline">\(AST\)</span>，可得到所有此类的 <span
+class="math inline">\(n\)</span> 个词组成的集合，即 <span
+class="math display">\[words(AST) = \{ word_1, word_2, ..., word_n
+\}\]</span> 很容易以此利用朴素贝叶斯分类得到预测模型</p>
+<h2 id="附录">附录</h2>
+<p><span class="math inline">\([1]\)</span> 例如，PHP 的 Zend 引擎生成的
+AST 的结构<a
+target="_blank" rel="noopener" href="https://github.com/php/php-src/blob/master/Zend/zend_ast.h#L165">如下</a>：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">uint16_t</span> zend_ast_kind; <span class="comment">// L154</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">zend_ast_list</span> &#123;</span> <span class="comment">// L165</span></span><br><span class="line">	zend_ast_kind kind;</span><br><span class="line">	zend_ast_attr attr;</span><br><span class="line">	<span class="type">uint32_t</span> lineno;</span><br><span class="line">	<span class="type">uint32_t</span> children;</span><br><span class="line">	zend_ast *child[<span class="number">1</span>];</span><br><span class="line">&#125; zend_ast_list;</span><br></pre></td></tr></table></figure> 易看出其中的 <code>zend_ast_kind kind</code>
+即为节点类型的标记值。</p>
+<p><span class="math inline">\([2]\)</span> 一般在这一步进行对 <span
+class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span>
+的“截短”，即使用一些方法降低不同的 <span
+class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span>
+的个数，以使得得到的特征向量 <span class="math inline">\(X\)</span>
+的维度数 <span class="math inline">\(|X|\)</span> 降低。</p>
+<p><span class="math inline">\([3]\)</span> 例如，在大量的 PHP
+代码样本（超过千万行）中得到的 AST 中，仅有不到 1 万个不同的 <span
+class="math inline">\(self\&amp;children_{AST}^{kind}(node_i)\)</span>
+的出现频率在 <span class="math inline">\(1/500000\)</span>
+以上，故得到一个整数（甚至是 <code>16bit</code> 短整数）哈希值是可行的，
+在实践中，通常采用从 0 开始递增地分配自然数值的简单哈希方法。</p>
+<p><span class="math inline">\([4]\)</span>
+对于一般的过程式脚本语言，在通俗的概念上，可以认为变量名、常量名、字面量、函数名，或包括面向对象的语言中的类名、接口名、成员名等，都可以称为有特征意义的“词”</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">总述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ast-%E7%BB%93%E6%9E%84%E7%89%B9%E5%BE%81%E7%9A%84%E6%8F%90%E5%8F%96"><span class="toc-number">2.</span> <span class="toc-text">AST 结构特征的提取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ast-%E8%AF%8D%E9%A2%91%E7%89%B9%E5%BE%81%E7%9A%84%E6%8F%90%E5%8F%96"><span class="toc-number">3.</span> <span class="toc-text">AST 词频特征的提取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">4.</span> <span class="toc-text">附录</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&text=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&is_video=false&description=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于传统机器学习技术及 AST 分析技术的 Webshell Detector&body=Check out this article: https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&title=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&name=基于传统机器学习技术及 AST 分析技术的 Webshell Detector&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/webshell-detector-based-on-traditional-machine-learning-and-ast-analysis/&t=基于传统机器学习技术及 AST 分析技术的 Webshell Detector"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

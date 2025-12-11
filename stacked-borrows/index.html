@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="这次我们介绍一篇发表在 POPL2020 上的文章《Stacked Borrows: An Aliasing Model for Rust》，其一作 Ralf Jung 目前是 MPI 软件系统研究所的博士后研究员，曾经做出过一些程序理解、验证及证明相关的成果，并曾工作于 Mozilla 的 Rust 程序语言组。 Rust 是一门年轻的系统级编程语言，也是 Mozilla 所期望的 C&#x2F;C++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文赏析 &quot;Stacked Borrows: An Aliasing Model for Rust&quot;">
+<meta property="og:url" content="https://imtwice.com/stacked-borrows/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="这次我们介绍一篇发表在 POPL2020 上的文章《Stacked Borrows: An Aliasing Model for Rust》，其一作 Ralf Jung 目前是 MPI 软件系统研究所的博士后研究员，曾经做出过一些程序理解、验证及证明相关的成果，并曾工作于 Mozilla 的 Rust 程序语言组。 Rust 是一门年轻的系统级编程语言，也是 Mozilla 所期望的 C&#x2F;C++">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/1.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/3.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/4.png">
+<meta property="og:image" content="https://imtwice.com/images/stacked-borrows/5.png">
+<meta property="article:published_time" content="2020-11-20T14:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.108Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="formal verification">
+<meta property="article:tag" content="rust">
+<meta property="article:tag" content="paper">
+<meta property="article:tag" content="aliasing model">
+<meta property="article:tag" content="dynamic analysis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/stacked-borrows/1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/twices-game-list/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/report-on-frama-c-and-seahorn/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/stacked-borrows/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.com/stacked-borrows/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/stacked-borrows/&t=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-11-20T14:00:00.000Z" class="dt-published" itemprop="datePublished">2020-11-20</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/reports/">reports</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/aliasing-model/" rel="tag">aliasing model</a>, <a class="p-category" href="/tags/dynamic-analysis/" rel="tag">dynamic analysis</a>, <a class="p-category" href="/tags/formal-verification/" rel="tag">formal verification</a>, <a class="p-category" href="/tags/paper/" rel="tag">paper</a>, <a class="p-category" href="/tags/rust/" rel="tag">rust</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>这次我们介绍一篇发表在 POPL2020 上的文章《Stacked Borrows: An
+Aliasing Model for Rust》，其一作 Ralf Jung 目前是 MPI
+软件系统研究所的博士后研究员，曾经做出过一些程序理解、验证及证明相关的成果，并曾工作于
+Mozilla 的 Rust 程序语言组。</p>
+<p>Rust 是一门年轻的系统级编程语言，也是 Mozilla 所期望的 C/C++
+的替代者。有趣的是，Rust 在允许像 C/C++
+那样的底层操作的同时提供了强有力的安全保证，这使开发人员更难写出有问题的代码；Rust
+也像其他现代语言一样提供了函数式的编程方法，并有着强大的工业界支持。</p>
+<p>Rust
+使用了一套略为复杂的类型系统管理对象的生存周期及所有权。以引用类型为例，Rust
+中有两种引用类型：一种是可变引用（mutable reference,
+<code>&amp;mut T</code>），用以表示对一个类型为 <code>T</code>
+的对象的引用，对象可以通过这种引用被更改，但在这个引用的生命期（lifetime）结束之前，被引用对象不能再有其他引用；另一种是共享引用（shared
+reference，<code>&amp;T</code>），其同样表示对一个类型为 <code>T</code>
+的对象的引用，但对象不能通过此引用被更改，而此时此对象可以拥有其他的共享引用。总结来说，在
+Rust 中别名（aliasing）和可变（mutation）不可能同时发生，如图一。</p>
+<figure>
+<img src="/images/stacked-borrows/1.png" alt="图一 Rust的引用类型" />
+<figcaption aria-hidden="true">图一 Rust的引用类型</figcaption>
+</figure>
+<p>显然，这种类型系统为我们提供了非常丰富的指针别名信息，如果编译优化器能够利用这种信息，可以减少很多静态分析的工作量，以提供更多的优化和更快的编译速度。如在图二的代码片段中，<code>unknown_function</code>
+可能是在其他编译单元（translation
+unit）中定义的函数，优化器只能通过耗时较长的链接期优化（link-time
+optimization）确定函数的性质。而当我们考虑到类型系统提供的别名信息时，由于
+<code>x</code> 是可变引用，且 <code>x</code> 的生存期一直持续到
+<code>unknown_function</code>
+被调用后，由可变引用的性质可知在此期间内不可能有任何引用指向
+<code>x</code> 所指向的对象。于是编译器能够断定 <code>test_unique</code>
+所返回的值一定是 <code>42</code>，而不可能被
+<code>unknown_function</code> 所更改。</p>
+<figure>
+<img src="/images/stacked-borrows/3.png" alt="图二 别名信息例子" />
+<figcaption aria-hidden="true">图二 别名信息例子</figcaption>
+</figure>
+<p>这些信息是 C/C++ 所得不到的。但在 Rust
+中，我们面临着一个严重的问题，即不安全代码块（unsafe code,
+<code>unsafe</code>）。在不安全代码块中，我们能够真正像 C/C++
+那样“为所欲为”地操作内存、使用指针、解引用任意地址。而不安全代码块有非常广泛的应用，Rust
+标准库中的许多数据结构均使用 <code>unsafe</code>
+实现，这些实现被包装成接口暴露给开发者使用。</p>
+<p>我们可以使用 <code>unsafe</code>
+轻易地打破之前的优化。如在图三所示的代码片段中，我们声明了一个裸指针
+<code>ALIAS</code> 作为全局变量，随后使用 <code>unsafe</code> 块将
+<code>ALIAS</code> 指向 <code>l</code>，而在 <code>test_unique</code>
+中，我们传入的是 <code>l</code> 的可变引用，其中调用的
+<code>unknown_function</code> 使用了 <code>ALIAS</code>。显然，这使得
+<code>test_unique</code> 的返回值不再是 <code>42</code>，而是
+<code>7</code>，这是我们所不希望的。</p>
+<figure>
+<img src="/images/stacked-borrows/4.png" alt="图三 unsafe块例子" />
+<figcaption aria-hidden="true">图三 unsafe块例子</figcaption>
+</figure>
+<p>我们希望这个优化是永远有效的，不希望其被 <code>unsafe</code>
+块打破。所以与其允许这样的 <code>unsafe</code>
+块从而打破优化，不如直接认为这样的写法是未定义行为（undefined
+behavior）。一旦程序执行到未定义行为，接下来所发生的一切将不做任何保证。在以上的例子中，我们认为打破这样优化的操作将触发未定义行为，这意味着
+<code>test_unique</code> 的返回值将不被保证是
+<code>7</code>，相反，我们在此时能够返回 <code>42</code>。</p>
+<p>实际上，许多语言都把某些行为定义为了“未定义行为”。最著名的当属 C 和
+C++，用其编写的程序很容易触发未定义行为。不仅如此，在 LLVM
+中为了实行某些优化也规定了一些未定义行为；而 Rust 的 <code>unsafe</code>
+块、甚至非 <code>unsafe</code> 代码中都有一些未定义行为的规定。</p>
+<p>本文的核心工作即是定义了一种别名模型 Stacked
+Borrows：其限定了指针在何时应如何访问内存，以确保在同一时间可变引用的独占性和共享引用的不可变性。并在两个方面证实了此模型是优秀的：一方面，其使用
+Coq
+证明了此别名模型提供了足够的限制以保证所实施的优化是正确的，即对可靠性做了证明；另一方面，其在一个
+Rust 的解释器 Miri
+上依据此模型实现了相应动态分析并在标准库测试用例上执行，以确保此模型没有对编程能力做太多限制，用于证明模型的可用性。</p>
+<p>Rust 编译器对 Rust 的处理经过了许多方面，依次涉及 HIR、MIR 及 LLVM IR
+三种中间码。编译器在其中的 MIR 层实现了名为 Borrow Checker
+的静态分析器，负责对于不涉及 unsafe
+的代码的对象生存期和所有权做检查，而上文提到的 Rust
+语言对于引用的各种限制既是由 Borrow Checker
+负责检查，对于违反规则的代码给出编译错误。而 Stacked Borrows
+使用动态分析的方式实现在 Miri
+中，对于安全和不安全的代码块都能够做检查。</p>
+<p>Stacked Borrows
+的核心思想之一是对同一对象的多个可变引用的生存期只能是栈式的嵌套关系，而不能有重叠。在图四的代码段中，<code>l</code>
+被 <code>a</code> 借用，而后又被 <code>b</code> 借用，随后依次使用
+<code>b</code>，<code>a</code>，<code>b</code> 更改了 <code>l</code>
+的值。编译器在第二次使用 <code>b</code> 时报错，这是因为在使用
+<code>a</code> 时就预示了 <code>b</code> 的生存期的结束，即预示
+<code>b</code> 已经将对象 <code>l</code> “还给”了
+<code>a</code>，此时根据可变引用的独占原则，已经不能再使用
+<code>b</code>，但程序却再次使用了
+<code>b</code>，从而引发了编译错误。这表明了可变引用的借用链条必须是如
+ABBA 这样的栈式关系，而非 ABAB 或其他形式。</p>
+<figure>
+<img src="/images/stacked-borrows/5.png" alt="图四 链式关系" />
+<figcaption aria-hidden="true">图四 链式关系</figcaption>
+</figure>
+<p>为了实现对于这样的关系的记录，Stacked Borrows
+对于每一个引用维护了一个唯一的标记，即每个引用由两部分组成：其一是所指向的地址，其二是一个唯一标记值。而对于每个地址，解释器都维护了一个栈，负责记录指针的借用链条。在对象被从任意可变引用
+<code>a</code> 借用给任意其他可变引用 <code>b</code> 时，视作一次对
+<code>a</code>
+引用的使用，若成功则向栈中压入此引用的标记值；而在任意可变引用
+<code>a</code> 被使用时，持续将元素弹出栈直到栈顶为 <code>a</code>
+的标记值。对于可变裸指针，模型将其视为一个单独的类别，且不使用标记区分不同的裸指针。模型规定，当使用某个指针时未能在栈中找到其标记值时，则会导致未定义行为。</p>
+<p>不仅如此，作者定义了许多分析规则以支持对于可变引用、共享引用、裸指针及一些高阶特性，并给出了规则的可靠性的证明梗概。在实验方面，作者在实现了
+Stacked Borrows 的 Miri 上执行 Rust 标准库测试用例，发现了 11
+处对规则的违反，其中大部分已经在上报后被 Rust
+团队修复。作者接下来的工作将是对并发方面的考虑以及将 Stacked Borrows
+集成到其之前的工作 RustBelt 中，这个工作给出了对 Rust
+的类型系统及一个类似 Rust MIR 的语言的形式化验证。</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/stacked-borrows/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/stacked-borrows/&text=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/stacked-borrows/&is_video=false&description=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&body=Check out this article: https://imtwice.com/stacked-borrows/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/stacked-borrows/&title=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/stacked-borrows/&name=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/stacked-borrows/&t=论文赏析 &#34;Stacked Borrows: An Aliasing Model for Rust&#34;"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

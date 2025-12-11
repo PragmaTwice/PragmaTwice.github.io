@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 che">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何给 clang-tidy 写新 checker">
+<meta property="og:url" content="https://imtwice.com/write-new-checker-for-clang-tidy/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="clang-tidy-in-clion  clang-tidy 里的 checker 起着着怎样的作用 clang-tidy 作为 c++ 中少数几个能用的 lint，广泛用于代码静态分析以检测问题。 把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组 checker，而其中每个 .cpp 文件（以及对应的头文件）都是一个 checker，结构出奇的简单。 每个 che">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-10-05T14:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.108Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="AST">
+<meta property="article:tag" content="program analysis">
+<meta property="article:tag" content="clang">
+<meta property="article:tag" content="llvm">
+<meta property="article:tag" content="clang-tidy">
+<meta property="article:tag" content="checker">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>如何给 clang-tidy 写新 checker</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/report-on-ark-compiler/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/does-cpp-need-reflection/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.com/write-new-checker-for-clang-tidy/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/write-new-checker-for-clang-tidy/&t=如何给 clang-tidy 写新 checker"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#clang-tidy-%E9%87%8C%E7%9A%84-checker-%E8%B5%B7%E7%9D%80%E7%9D%80%E6%80%8E%E6%A0%B7%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">clang-tidy 里的
+checker 起着着怎样的作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E8%A1%8C%E5%8A%A8"><span class="toc-number">2.</span> <span class="toc-text">开始行动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matcher%E5%87%BD%E6%95%B0%E5%BC%8F%E4%B8%8E%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF"><span class="toc-number">2.1.</span> <span class="toc-text">matcher：函数式与编译错误</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#visitor%E7%9C%9F%E9%A6%99"><span class="toc-number">2.2.</span> <span class="toc-text">visitor：真香</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">引用</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        如何给 clang-tidy 写新 checker
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-10-05T14:00:00.000Z" class="dt-published" itemprop="datePublished">2019-10-05</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/daily/">daily</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/AST/" rel="tag">AST</a>, <a class="p-category" href="/tags/c/" rel="tag">c++</a>, <a class="p-category" href="/tags/checker/" rel="tag">checker</a>, <a class="p-category" href="/tags/clang/" rel="tag">clang</a>, <a class="p-category" href="/tags/clang-tidy/" rel="tag">clang-tidy</a>, <a class="p-category" href="/tags/llvm/" rel="tag">llvm</a>, <a class="p-category" href="/tags/program-analysis/" rel="tag">program analysis</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <figure>
+<img
+src="/images/write-new-checker-for-clang-tidy/clang-tidy-in-clion.png"
+alt="clang-tidy-in-clion" />
+<figcaption aria-hidden="true">clang-tidy-in-clion</figcaption>
+</figure>
+<h2 id="clang-tidy-里的-checker-起着着怎样的作用">clang-tidy 里的
+checker 起着着怎样的作用</h2>
+<p>clang-tidy 作为 c++ 中少数几个能用的
+lint，广泛用于代码静态分析以检测问题。</p>
+<p>把 clang-tidy clone 到本地后，你会发现每个文件夹都有一组
+checker，而其中每个 <code>.cpp</code> 文件（以及对应的头文件）都是一个
+checker，结构出奇的简单。</p>
+<p>每个 checker 都是针对某一特定问题的的检测器，如 <a
+target="_blank" rel="noopener" href="https://github.com/isocpp/CppCoreGuidelines">CppCoreGuidelines</a>
+是标准委员会提出的一些“最佳实践”，我们也可以称之为“规范”或者“约束”。而
+clang-tidy 实现了对于每一个“规范”项的检查，如
+<code>CppCoreGuidelines/AvoidGotoCheck</code> 实现了对于 <a
+target="_blank" rel="noopener" href="http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto">ES.76:
+Avoid goto</a> 的检查。</p>
+<p>我们可以做个小试验： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    loop: std::cout &lt;&lt; <span class="string">&quot;hello&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">goto</span> loop;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后执行 clang-tidy 以检测文件（设以上代码保存到 test.cpp）
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">clang-tidy --checks=<span class="string">&quot;cppcoreguidelines-avoid-goto&quot;</span> test.cpp --</span></span><br></pre></td></tr></table></figure></p>
+<p>很多人会好奇为什么语句的末尾有
+<code>--</code>，所以我决定不做解释。我们发现有类似以下的输出：
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1 warning generated.</span><br><span class="line">test.cpp:5:2: warning: avoid using &#x27;goto&#x27; for flow control [cppcoreguidelines-avoid-goto]</span><br><span class="line">        goto loop;</span><br><span class="line">        ^</span><br><span class="line">test.cpp:4:2: note: label defined here</span><br><span class="line">        loop: f();</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure></p>
+<p>clang-tidy 检测出了 <code>goto</code>
+语句处和与之对应的标签的定义处。</p>
+<p>不过我相信很多人会抱怨这个检查太 trivial，下面我们会写较复杂的
+checker 以体验 clang-tidy 借助于强大的 LLVM/clang 而具有的无穷威力。</p>
+<h2 id="开始行动">开始行动</h2>
+<p>首先，本篇文章并不包含环境的搭建、代码的详细解读、API
+的说明，也并不给出源代码。其次，我假设读者熟悉 C++
+（<code>std&gt;=11</code>）；编译器前端的知识，包括 parser
+等；以及软件工程知识，如 visitor pattern。</p>
+<p>clang-tidy 提供了一个名为 <code>add_new_check</code> 的脚本文件（用
+Python 编写），用以快速生成新的 checker，我们可以借助他来
+init。之后我真诚地推荐读者先 cmake
+出平台特定的可构建项目后构建整个项目，在这个过程中你可以选择看个电影、陪妹子吃顿饭、唱K，总之请不要把时光葬送在盯着进度条看上。</p>
+<h3 id="matcher函数式与编译错误">matcher：函数式与编译错误</h3>
+<p>LibASTMatchers 是 clang 提供的一种 DSL（之所以称之为 DSL
+是因为其与正常的执行逻辑不同），以谓词的方式给出对节点的约束，以找到符合约束的节点。</p>
+<p>写起来有种 SQL 的查询语句一样的感觉（或是其他 query
+language），有种函数式的手感。但众所周知，这个库用的一些算不上奇技淫巧的“技巧”来完成，所以如果不慎用错函数，编译错误信息简直难以看懂，哦不，根本看不懂。不过没到元编程的那种境界，如果你比较熟悉
+C++，找到错误还是不难的（盲猜）。</p>
+<p>对于比较简单的，不含递归的检查，我们可以使用 matcher
+很轻易的完成，这是 matcher 最大的优点。reference
+上有个不错的例子（我做了修改）： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">recordDecl(hasDescendant(</span><br><span class="line">    ifStmt(hasThen(</span><br><span class="line">        stmt(hasDescendant(</span><br><span class="line">            ifStmt()))))))</span><br></pre></td></tr></table></figure></p>
+<p>我们可以调出 query language 那种特定的脑回路来读这段代码：有一个
+<code>recordDecl</code>（记录声明，在 c++ 里可以看作
+<code>struct</code>/<code>class</code>），它有这样的后代（即 AST 上这个
+<code>recordDecl</code> 节点的后代节点），which is 一个
+<code>ifStmt</code>，这个 <code>ifStmt</code> 的 true 分支语句中有后代为
+<code>ifStmt</code>，整体来说非常易懂且简洁。</p>
+<p>我们会发现库中提供了三类匹配器：</p>
+<ul>
+<li>Node Matchers: 匹配某个类型的节点，如上面的
+<code>recordDecl</code>、<code>ifStmt</code></li>
+<li>Narrowing Matchers:
+匹配节点的某种属性，上面的语句中没有出现，但这一类应该最容易理解，如描述某个
+<code>CXXMethodDecl</code> 是否被 const 修饰的 <code>isConst</code></li>
+<li>Traversal Matchers: 遍历匹配器，用来描述节点间关系，如上面的
+<code>hasDescendant</code>、<code>hasThen</code></li>
+</ul>
+<p>那么我们怎么表达逻辑稍微复杂点的匹配查询呢，我们需要一些可以组合的、通用的谓词：</p>
+<ul>
+<li><code>all</code>: 描述某些谓词全部成立</li>
+<li><code>any</code>: 描述某些谓词至少有一个成立</li>
+<li><code>anything</code>: 这个谓词始终成立</li>
+<li><code>unless</code>: 描述某个谓词不成立，类似于取非</li>
+</ul>
+<p>还有一些比较通用的谓词，如 <code>forEach</code>, <code>has</code>
+等，顾名思义，请查看文档。</p>
+<p>掌握了这些知识，我们就可以根据文档做一些练习，如：</p>
+<ul>
+<li>写一个检测 <code>sizeof</code> 是否只作用于变量或是类型的
+matcher</li>
+<li>（选做）并在诊断信息中输出 <code>sizeof</code>
+中的表达式及其类型</li>
+</ul>
+<h3 id="visitor真香">visitor：真香</h3>
+<p>当遇到非常复杂的逻辑时，一个 matcher 可能很难或是无法完成任务，多个
+matcher 或许很复杂或是也无法完成任务，我们可以配合使用 visitor
+来完成。</p>
+<p>我们只介绍 <code>StmtVisitor</code>，顾名思义它可以遍历 AST 中的
+<code>Stmt</code> 节点，我们需要知道的是在 clang 里 <code>Expr</code>
+继承了 <code>Stmt</code>，所以我们可以用它访问语句和表达式。</p>
+<p>构建一个可以 work 的 vistor 很简单，我们只需要继承
+<code>StmtVistor</code>，然后重写 <code>VisitStmt</code> 以遍历每个
+<code>Stmt</code> 节点的所有子节点，如： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">VisitStmt</span><span class="params">(Stmt *stmt)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> *child : stmt-&gt;<span class="built_in">children</span>()) &#123;</span><br><span class="line">    <span class="built_in">Visit</span>(child);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样我们就可以访问到全部的节点，然后我们可以根据需要重写其他的方法，以完成特定的任务，如重写
+<code>VisitCXXMemberCallExpr</code> 以在访问到
+<code>CXXMemberCallExpr</code> 时做一些事情。</p>
+<p>好了，让我们开始练习：</p>
+<ul>
+<li>实现针对《Effective C++》中第九条“在析构/构造时不要调用虚函数”
+的检测器</li>
+<li>（选做）输出时请指明在 ctor/dtor
+中哪一个调用涉及了虚函数，如果这个调用本身不是虚函数，那么请指出这个调用中在那个地方调用了虚函数</li>
+</ul>
+<p>思路提示：当然是 DFS 啦</p>
+<p>（答案可来信索取，自己完成或许更有成就感）</p>
+<h2 id="引用">引用</h2>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://clang.llvm.org/extra/clang-tidy/">Clang-Tidy -
+Clang documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://clang.llvm.org/docs/LibASTMatchers.html">Matching
+the Clang AST - Clang documentation</a></li>
+<li><a
+target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1StmtVisitor.html">clang::StmtVisitor&lt;ImplClass,
+RetTy, ParamTys&gt; Class Template Reference</a></li>
+</ol>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#clang-tidy-%E9%87%8C%E7%9A%84-checker-%E8%B5%B7%E7%9D%80%E7%9D%80%E6%80%8E%E6%A0%B7%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">clang-tidy 里的
+checker 起着着怎样的作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E8%A1%8C%E5%8A%A8"><span class="toc-number">2.</span> <span class="toc-text">开始行动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#matcher%E5%87%BD%E6%95%B0%E5%BC%8F%E4%B8%8E%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF"><span class="toc-number">2.1.</span> <span class="toc-text">matcher：函数式与编译错误</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#visitor%E7%9C%9F%E9%A6%99"><span class="toc-number">2.2.</span> <span class="toc-text">visitor：真香</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">引用</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/write-new-checker-for-clang-tidy/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/write-new-checker-for-clang-tidy/&text=如何给 clang-tidy 写新 checker"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/write-new-checker-for-clang-tidy/&is_video=false&description=如何给 clang-tidy 写新 checker"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=如何给 clang-tidy 写新 checker&body=Check out this article: https://imtwice.com/write-new-checker-for-clang-tidy/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/write-new-checker-for-clang-tidy/&title=如何给 clang-tidy 写新 checker"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/write-new-checker-for-clang-tidy/&name=如何给 clang-tidy 写新 checker&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/write-new-checker-for-clang-tidy/&t=如何给 clang-tidy 写新 checker"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>

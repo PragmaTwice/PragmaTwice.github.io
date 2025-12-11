@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="cpp-error  序 十月中旬\(^1\)，WG21\(^2\) 公开了整理出的十月份提案列表，很长。 委员会各种会议如火如荼，C++ 却已近秋。 Bjarne Stroustrup 在三月份写过题为 Remember the Vasa! 的短文，提出了一个非常重要的忧虑 —— C++ 是否能够继续以目前的形式扩充。 这篇短文引出了一个现实，所有这些提案没有一个一致、可共享的目标。每个人分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 秋季漫谈">
+<meta property="og:url" content="https://imtwice.com/cpp-fall-talk/index.html">
+<meta property="og:site_name" content="I&#39;m Twice">
+<meta property="og:description" content="cpp-error  序 十月中旬\(^1\)，WG21\(^2\) 公开了整理出的十月份提案列表，很长。 委员会各种会议如火如荼，C++ 却已近秋。 Bjarne Stroustrup 在三月份写过题为 Remember the Vasa! 的短文，提出了一个非常重要的忧虑 —— C++ 是否能够继续以目前的形式扩充。 这篇短文引出了一个现实，所有这些提案没有一个一致、可共享的目标。每个人分">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://imtwice.com/images/cpp-fall-talk/cpp-error.jpg">
+<meta property="article:published_time" content="2018-10-19T03:12:00.000Z">
+<meta property="article:modified_time" content="2025-12-11T13:49:44.107Z">
+<meta property="article:author" content="Pragma Twice">
+<meta property="article:tag" content="c++">
+<meta property="article:tag" content="c++ standard">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imtwice.com/images/cpp-fall-talk/cpp-error.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>C++ 秋季漫谈</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114681413-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-114681413-1');
+  </script>
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/true" title="I&#39;m Twice" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/does-cpp-need-reflection/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/information-of-past-presentations/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/cpp-fall-talk/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/cpp-fall-talk/&text=C++ 秋季漫谈"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/cpp-fall-talk/&is_video=false&description=C++ 秋季漫谈"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 秋季漫谈&body=Check out this article: https://imtwice.com/cpp-fall-talk/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/cpp-fall-talk/&name=C++ 秋季漫谈&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/cpp-fall-talk/&t=C++ 秋季漫谈"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A"><span class="toc-number">2.</span> <span class="toc-text">上</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD"><span class="toc-number">3.</span> <span class="toc-text">中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B"><span class="toc-number">4.</span> <span class="toc-text">下</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B4-2%E6%9C%88%E8%A1%A5%E5%85%85"><span class="toc-number">4.1.</span> <span class="toc-text">2019 年 2月补充</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B4-7%E6%9C%88%E8%A1%A5%E5%85%85"><span class="toc-number">4.2.</span> <span class="toc-text">2019 年 7月补充</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8"><span class="toc-number">5.</span> <span class="toc-text">注</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        C++ 秋季漫谈
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Pragma Twice</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-10-19T03:12:00.000Z" class="dt-published" itemprop="datePublished">2018-10-19</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/daily/">daily</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/c/" rel="tag">c++</a>, <a class="p-category" href="/tags/c-standard/" rel="tag">c++ standard</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <figure>
+<img src="/images/cpp-fall-talk/cpp-error.jpg" alt="cpp-error" />
+<figcaption aria-hidden="true">cpp-error</figcaption>
+</figure>
+<h2 id="序">序</h2>
+<p>十月中旬<span class="math inline">\(^1\)</span>，WG21<span
+class="math inline">\(^2\)</span>
+公开了整理出的十月份提案列表，很长。</p>
+<p>委员会各种会议如火如荼，C++ 却已近秋。</p>
+<p>Bjarne Stroustrup 在三月份写过题为 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0977r0.pdf"><em>Remember
+the Vasa!</em></a> 的短文，提出了一个非常重要的忧虑 —— C++
+是否能够继续以目前的形式扩充。</p>
+<p>这篇短文引出了一个现实，所有这些提案没有一个一致、可共享的目标。每个人分散地提出自己认为可行地修改，而所有人一起这样做就可能导致
+Vasa<span class="math inline">\(^3\)</span> 式结果。</p>
+<h2 id="上">上</h2>
+<p>事到如今确实只能修补，但修补不是糊墙。</p>
+<p>一个有趣的问题是，C++ 的优势是什么？</p>
+<ul>
+<li>直接编译到机器码，没有中间语言、没有
+GC，适合性能需求高的场合或是搭建底层、接近硬件的系统</li>
+<li>历史积淀深厚，有着一大堆各领域性能需求高的项目支撑，且在很大程度上完全兼容
+C 或易于将 C 项目迁移到 C++
+编译环境；在大多数操作系统中都有相应的编译套件</li>
+<li>较强大的静态类型系统，除了没有 sum type<span
+class="math inline">\(^4\)</span> 之外，其他方面的表现是强劲的，尤其是
+C++11 及之后的标准，甚至部分标准库部件（如
+<code>std::chrono</code>）以富类型的方式 ( type rich style ) 架构</li>
+<li>支持多种范式而没有做太多约束，甚至最近加入了 contract based
+programming<span
+class="math inline">\(^5\)</span>，你可以用你自己喜欢的想法架构你的代码，唯一的缺点是，忍受略蹩脚的文法</li>
+</ul>
+<p>那么 c++ 到底需要什么？</p>
+<h2 id="中">中</h2>
+<p>关于这个问题 SG15<span class="math inline">\(^6\)</span>
+最有发言权，十月份提案中有另一篇标题相似的短文 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1300r0.pdf"><em>Remember
+the FORTRAN</em></a>，指出了 Modules TS<span
+class="math inline">\(^7\)</span> 在编译环境的核心问题。</p>
+<p>当我们回顾 C++ 的工具链演变史，对比其他语言，我们可以很轻易地发现 ——
+C++ 在语言上缺乏模块系统，以及基于模块的依赖管理工具及其他工具。当 C++
+从 C 中继承了蠢萌的预处理器引入其他文件的机制时，已经存在的 Ada、ML
+等语言早已有了模块系统。</p>
+<p>甚至于说，C++ 在符号链接等方面的麻烦，要由 <code>#include</code>
+等直接负责。甚至在 Modules TS 的设计时，由于要考虑到
+<code>#include</code> 等预处理指令，也变得麻烦。</p>
+<p>委员会部分成员最近致力于 <em>constexpr
+everywhere</em>，甚至希望将语言中的 <code>new</code>
+以及周边标准作修改以适用于 <code>constexpr</code> <span
+class="math inline">\(^{8}\)</span>，以做到在编译期使用标准容器，如
+<code>std::vector</code>。</p>
+<p>当然这就引出一个巨大的问题 —— C++ 没有编译时反射。Reflection TS
+由此而生，但设计的并不怎么样，甚至于 Function Reflection
+这种最基本的东西都是后来补进去的<span
+class="math inline">\(^{9}\)</span>。C++
+太过于复杂以至于很难设计出完整的反射。</p>
+<p>唯一值得探讨的我认为是 Herb Sutter 提出的
+Metaclasses。当然这里重点并不是 Metaclasses 本身，而是跟随 Metaclasses
+一起提出的、用作 Metaclasses 的基础设施支撑的一个提案<span
+class="math inline">\(^{10}\)</span>，其中的 <code>constexpr</code>
+block、<code>for...</code> statement、<code>declname</code>
+以及并不基于模板的反射 API 都是非常棒的主意，可惜我认为近期<span
+class="math inline">\(^{11}\)</span>难以并入标准。</p>
+<p>纵观目前活跃的提案，已经并入 C++20 的 部分Concepts TS<span
+class="math inline">\(^{12}\)</span>，以及 Contract<span
+class="math inline">\(^5\)</span> 都并不能给 C++
+带来决定性的变化，事实上甚至有不少质疑<span
+class="math inline">\(^{13}\)</span>，不过基于 Concepts 的 Ranges TS
+以及众望所归的 Coroutines TS 被期冀有望<span
+class="math inline">\(^{14}\)</span>并入 C++20 确实是个好消息。</p>
+<p>但是由于 Executor 未并入标准（甚至未作为 TS）<span
+class="math inline">\(^{15}\)</span>，许多基于它的设施不可能完整地在它之前并入标准。这其中包括了
+Networking TS，当然值得一提的是 Networking 的主要部分并不依赖于
+Executor<span class="math inline">\(^{16}\)</span>。</p>
+<h2 id="下">下</h2>
+<p>所有的这些都在传达着一个消息 —— C++ 身上的历史包袱重地令人叹惋，而
+D、Rust 等（抱歉没有
+Go）语言以重新设计的轻盈洁净的文法、语义试图创造一种更优雅地高性能编程环境。</p>
+<p>如果 Modules 可以在近期并入标准，我大概还会吹 C++。</p>
+<h3 id="年-2月补充">2019 年 2月补充</h3>
+<p>综合 Toronto, Rapperswil, San Diego, Kona meeting 的结果， Modules,
+Ranges, Coroutines, Concepts, Contracts 都已经并入 C++20。</p>
+<h3 id="年-7月补充">2019 年 7月补充</h3>
+<p>在 Cologne meeting 上，Contracts 被移出 C++20。</p>
+<h2 id="注">注</h2>
+<p><span class="math inline">\([0]\)</span> 封面图来自于刘雨培的文章 <a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/24328534">为什么不再想碰 C++</a></p>
+<p><span class="math inline">\([1]\)</span> 具体为 2018 年 10 月 13
+日</p>
+<p><span class="math inline">\([2]\)</span> 指 JTC1/SC22/WG21，The C++
+Standards Committee</p>
+<p><span class="math inline">\([3]\)</span> <a
+target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Vasa_(ship)">瓦萨号</a>，是瑞典国王古斯塔夫二世下令建造的一艘军舰</p>
+<p><span class="math inline">\([4]\)</span> 通俗上称为 <a
+target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Tagged_union">tagged
+union</a>，实际上 c++ 有这类提案，例如 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0095r2.html">P0095</a></p>
+<p><span class="math inline">\([5]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0542r4.html">P0542</a>,
+Support for contract based programming in C++ （已并入 c++20）</p>
+<p><span class="math inline">\([6]\)</span> 指 JTC1/SC22/WG21/SG15</p>
+<p><span class="math inline">\([7]\)</span> 这里泛指 Modules TS
+以及之后的 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1103r1.pdf">Merging
+Modules</a>，下同</p>
+<p><span class="math inline">\([8]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0784r1.html">P0784</a>,
+Standard containers and constexpr</p>
+<p><span class="math inline">\([9]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0670r4.html">P0670</a>,
+Function reflection</p>
+<p><span class="math inline">\([10]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0712r0.pdf">P0712</a>,
+Implementing language support for compile-time metaprogramming</p>
+<p><span class="math inline">\([11]\)</span> 在 C++
+标准化的尺度上，我认为 3-6 年可以算作近期</p>
+<p><span class="math inline">\([12]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4674.pdf">N4674</a>,
+Working Draft, C++ extensions for Concepts</p>
+<p><span class="math inline">\([13]\)</span> 如对 Concepts TS 的质疑 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0726r0.html">P0726</a></p>
+<p><span class="math inline">\([14]\)</span> 见 <a
+target="_blank" rel="noopener" href="https://herbsutter.com/2018/07/02/trip-report-summer-iso-c-standards-meeting-rapperswil">Trip
+report: Summer ISO C++ standards meeting (Rapperswil)</a> 中的
+<em>Whats's Next</em> 小节</p>
+<p><span class="math inline">\([15]\)</span> <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1256r0.html">P1256</a>
+建议将其作为 TS 处理</p>
+<p><span class="math inline">\([16]\)</span> 由此 <a
+target="_blank" rel="noopener" href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1259r0.html">P1259</a>
+建议并入不依赖于 Executor 的那部分</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A"><span class="toc-number">2.</span> <span class="toc-text">上</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD"><span class="toc-number">3.</span> <span class="toc-text">中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B"><span class="toc-number">4.</span> <span class="toc-text">下</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B4-2%E6%9C%88%E8%A1%A5%E5%85%85"><span class="toc-number">4.1.</span> <span class="toc-text">2019 年 2月补充</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B4-7%E6%9C%88%E8%A1%A5%E5%85%85"><span class="toc-number">4.2.</span> <span class="toc-text">2019 年 7月补充</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8"><span class="toc-number">5.</span> <span class="toc-text">注</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://imtwice.com/cpp-fall-talk/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://imtwice.com/cpp-fall-talk/&text=C++ 秋季漫谈"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://imtwice.com/cpp-fall-talk/&is_video=false&description=C++ 秋季漫谈"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=C++ 秋季漫谈&body=Check out this article: https://imtwice.com/cpp-fall-talk/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://imtwice.com/cpp-fall-talk/&title=C++ 秋季漫谈"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://imtwice.com/cpp-fall-talk/&name=C++ 秋季漫谈&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://imtwice.com/cpp-fall-talk/&t=C++ 秋季漫谈"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2017-2025
+    Pragma Twice
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'imtwice';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- hexo-inject:end --></body>
+</html>
